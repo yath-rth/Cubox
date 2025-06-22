@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf18ba8940d2c8448893df71b69fcc58, type: 3}
+  m_Name: MG Muzzle
+  m_EditorClassIdentifier: 
+  stat:
+    stat: 0
+    value: 0
+  statsToAffect:
+  - {fileID: 11400000, guid: 8d64c3cc0aab24d46b7507c4e5daa9e0, type: 2}
+  - {fileID: 11400000, guid: e10b4ccfaceae1b478a96e163f7e3e27, type: 2}
+  - {fileID: 11400000, guid: 0f7de88d5ec251643a082e47370cfb3b, type: 2}
+  numberOfMuzzlesToUnlock: 2

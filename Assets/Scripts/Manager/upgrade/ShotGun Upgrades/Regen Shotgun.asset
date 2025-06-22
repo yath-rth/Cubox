@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3d580ebc1e391c459611a1ef05ef158, type: 3}
+  m_Name: Regen Shotgun
+  m_EditorClassIdentifier: 
+  upgradename: Regeneration
+  description: 
+  type: 2
+  guntype: 02000000
+  icon: {fileID: 0}
+  useORdont: 0
+  appliedStats:
+  - {fileID: 11400000, guid: 6818ed9406cbbe944a8b1b764216e9cf, type: 2}
+  upgrades:
+  - stat: 0
+    value: 2
+  requiredUgrade:
+  - {fileID: 11400000, guid: aed23b1e8ac22c742be4c03045ac307a, type: 2}
+  - {fileID: 11400000, guid: f352096b1c3af91499ef18012c09f498, type: 2}
+  requiredNonStatUgrade:
+  - {fileID: 11400000, guid: 736de427ac7ae0547b08083098f3df56, type: 2}
