@@ -1,0 +1,10 @@
+/*
+
+TODO;
+--feat: enemies can interact with poerups and othe rpickable objects in the map giving them the ability and causing a sense of urgency in the player to grab them;
+--change the size of the map as the time progresses sort of like a dungeon crawler where the rooms switch so for this game instead of rooms the maps layout changes causing new obstacles
+--add obstacles such as explosive barrels in the game which interact with every living being in the game not just the player forcing the pluyaer to play around the environment instead of just spamming
+--make it so that the payer has to collect ammo from locations instead of just getting unlimited ammo making them think around instead of just pressing the mouse button
+
+
+*/

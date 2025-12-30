@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bcd23c8192a8a814caa469de01b97877, type: 3}
+  m_Name: Machine Gun
+  m_EditorClassIdentifier: 
+  defaultStats:
+  - stat: 2
+    value: 50
+  - stat: 4
+    value: 425
+  appliedUpgrades: []
+  gun: {fileID: 2126584955308840779, guid: 71a400dbd9324e74a9ef9afa9578758c, type: 3}
+  Name: Machine Gun
+  sprite: {fileID: 21300000, guid: 6024fb16b18fb2d4a905756e4c53aafd, type: 3}
+  bulletSpeed: 30
+  range: 0.3
+  ammo: 40
+  reloadTime: 1
+  audioClip: {fileID: 8300000, guid: 7ecbf40fcc1221e45870cddc049cdafd, type: 3}
+  active: 1
+  infiniteAmmo: 0
