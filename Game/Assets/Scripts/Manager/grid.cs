@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using Cinemachine;
+using Unity.Cinemachine;
 using UnityEngine;
 
 public class grid : MonoBehaviour
@@ -23,7 +23,7 @@ public class grid : MonoBehaviour
     Color foregroundColor;
     Color backgroundColor;
 
-    [SerializeField] Cinemachine.CinemachineVirtualCamera cam;
+    [SerializeField] CinemachineCamera cam;
 
     [HideInInspector]
     public List<GameObject> positions;
@@ -108,12 +108,8 @@ public class grid : MonoBehaviour
         obstacleHolder.parent = mapHolder;
 
         CinemachineTargetGroup targetGroup = obstacleHolder.gameObject.AddComponent<CinemachineTargetGroup>();
-        targetGroup.m_Targets = new CinemachineTargetGroup.Target[10];
-        targetGroup.m_UpdateMethod = CinemachineTargetGroup.UpdateMethod.FixedUpdate;
-
-        CinemachineTargetGroup.Target target;
-        target.weight = 1;
-        target.radius = 0;
+        targetGroup.Targets = new List<CinemachineTargetGroup.Target>();
+        targetGroup.UpdateMethod = CinemachineTargetGroup.UpdateMethods.FixedUpdate;
 
         mapBlockers = new List<Transform>();
 
@@ -142,38 +138,46 @@ public class grid : MonoBehaviour
 
         for (int i = 0; i < 3; i++)
         {
-            target.target = Instantiate(camPos, mapBlockers[i].position * camOffset, Quaternion.identity).transform;
-            target.target.parent = mapHolder;
-            targetGroup.m_Targets[i] = target;
+            Transform obj = Instantiate(camPos, mapBlockers[i].position * camOffset, Quaternion.identity).transform;
+            CinemachineTargetGroup.Target target = newTarget(obj);
+            target.Object.parent = mapHolder;
+            targetGroup.Targets.Add(target);
         }
 
         if (healthBar != null)
         {
             healthBar.transform.position = new Vector3(0, 0, -1 * (((mapsize.y + maxSizeY) / 4f * tileSize) + healthBarOffset));
-            target.target = healthBar.transform;
-            targetGroup.m_Targets[4] = target;
+            targetGroup.Targets.Add(newTarget(healthBar.transform));
         }
 
         if (ammoBar != null)
         {
             ammoBar.transform.position = new Vector3(otherBarOffsetX, 0, -1 * (((mapsize.y + maxSizeY) / 4f * tileSize) + healthBarOffset + otherBarOffsetY + ammoBarOffset));
-            target.target = ammoBar.transform;
-            targetGroup.m_Targets[5] = target;
+            targetGroup.Targets.Add(newTarget(ammoBar.transform));
         }
 
         if (staminaBar != null)
         {
             staminaBar.transform.position = new Vector3(otherBarOffsetX, 0, -1 * (((mapsize.y + maxSizeY) / 4f * tileSize) + healthBarOffset + otherBarOffsetY + ammoBarOffset + staminaBarOffset));
-            target.target = staminaBar.transform;
-            targetGroup.m_Targets[6] = target;
+            targetGroup.Targets.Add(newTarget(staminaBar.transform));
         }
 
-        if (cam != null) cam.m_LookAt = obstacleHolder;
+        if (cam != null) cam.LookAt = obstacleHolder;
     }
 
     public GameObject getRandomPos()
     {
         return positions[Random.Range(0, positions.Count)];
+    }
+
+    CinemachineTargetGroup.Target newTarget(Transform obj)
+    {
+        CinemachineTargetGroup.Target target = new CinemachineTargetGroup.Target();
+        target.Weight = 1;
+        target.Radius = 0;
+        target.Object = obj;
+
+        return target;
     }
 
     public GameObject getRandomPosNearPlayer()

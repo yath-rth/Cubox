@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using DG.Tweening;
 
 public class Player : MonoBehaviour
 {
@@ -41,6 +42,9 @@ public class Player : MonoBehaviour
     float canRegen, shoot;
     int temp;
     Vector2 move;
+    InputType currInput = InputType.NONE;
+    InputType prevInput = InputType.FRONT;
+
 
     private void Awake()
     {
@@ -126,7 +130,7 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (Alive) moveFunc();
+        //if (Alive) moveFunc();
     }
 
     void input()
@@ -134,10 +138,36 @@ public class Player : MonoBehaviour
         move = newInput.WSAD.Movement.ReadValue<Vector2>();
         look = newInput.WSAD.Look.ReadValue<Vector2>();
 
+        if (ConnectionManager.instance != null)
+        {
+            if (move.x > 0 && move.y == 0) currInput = InputType.RIGHT;
+            else if (move.x < 0 && move.y == 0) currInput = InputType.LEFT;
+            else if (move.x == 0 && move.y > 0) currInput = InputType.FRONT;
+            else if (move.x == 0 && move.y < 0) currInput = InputType.BACK;
+            else if (move.x > 0 && move.y > 0) currInput = InputType.FRIGHT;
+            else if (move.x < 0 && move.y > 0) currInput = InputType.FLEFT;
+            else if (move.x > 0 && move.y < 0) currInput = InputType.BRIGHT;
+            else if (move.x < 0 && move.y < 0) currInput = InputType.BLEFT;
+            else currInput = InputType.NONE;
+
+            if(currInput != prevInput)
+            {
+                ConnectionManager.instance.SendInput(currInput);
+                prevInput = currInput;
+            }
+            //else ConnectionManager.instance.SendInput(InputType.NONE);
+        }
+
         moveDirWSAD = new Vector3(move.x, 0, move.y).normalized;
 
         shoot = newInput.WSAD.Shoot.ReadValue<float>();
         if (gun != null) gun.setInput(shoot);
+    }
+
+    public void movePlayer(ServerMessage msg)
+    {
+        Debug.Log("changing player position");
+        transform.DOMove(msg.position, 1f);
     }
 
     void moveFunc()
