@@ -1,17 +1,21 @@
 using UnityEngine;
-using Unity;
-
 using NativeWebSocket;
 using UnityEngine.Events;
 using System;
-using UnityEditor.VersionControl;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using System.Data.Common;
+
 
 public class ConnectionManager : MonoBehaviour
 {
     public static ConnectionManager instance;
     WebSocket ws;
     public String playerId { get; private set; }
-    public UnityEvent<ServerMessage> onMessage;
+    [SerializeField] GameObject playerPrefab;
+    Dictionary<string, PlayerNetworkObject> players = new Dictionary<string, PlayerNetworkObject>();
+
+    bool hasPlayerId = false;
 
     private void Awake()
     {
@@ -42,12 +46,14 @@ public class ConnectionManager : MonoBehaviour
         {
             // getting the message as a string
             var message = System.Text.Encoding.UTF8.GetString(bytes);
-            var jsonMsg = JsonUtility.FromJson<ServerMessage>(message);
-            onMessage?.Invoke(jsonMsg);
+            var jsonMsg = JsonConvert.DeserializeObject<ServerMessage>(message);
+
+            //Debug.Log(message);
+            onMessageRecieve(jsonMsg);
         };
 
-        // Keep sending messages at every 0.3s
-        InvokeRepeating("SendSnapShot", 0.0f, 0.3f);
+        // Keep sending messages at every 0.1s
+        InvokeRepeating("SendRotation", 0.0f, 0.1f);
 
         // waiting for messages
         await ws.Connect();
@@ -62,23 +68,79 @@ public class ConnectionManager : MonoBehaviour
 
     public async void SendInput(InputType input)
     {
+        if (!hasPlayerId) return;
+
         if (ws.State == WebSocketState.Open)
         {
-            PlayerInputMessage pim = new PlayerInputMessage(playerId, input);
-            await ws.SendText(JsonUtility.ToJson(pim).ToString());
+            ClientMessage pim = new ClientMessage(playerId, input);
+            await ws.SendText(JsonConvert.SerializeObject(pim, Formatting.None, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                NullValueHandling = NullValueHandling.Ignore
+            }));
         }
     }
 
-    async void SendSnapShot()
+    async void SendRotation()
     {
+        if (!hasPlayerId) return;
+
         if (ws.State == WebSocketState.Open)
         {
-
+            ClientMessage msg = new ClientMessage(playerId, Player.playerInstance.transform.eulerAngles);
+            await ws.SendText(JsonConvert.SerializeObject(msg, Formatting.None, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                NullValueHandling = NullValueHandling.Ignore
+            }));
         }
     }
 
     private async void OnApplicationQuit()
     {
         await ws.Close();
+    }
+
+    void spawnPlayer(ServerMessage msg)
+    {
+        if (playerPrefab != null)
+        {
+            foreach (string id in msg.players.Keys)
+            {
+                if (!players.ContainsKey(id))
+                {
+                    GameObject obj = Instantiate(playerPrefab, msg.players[id].position, Quaternion.Euler(msg.players[id].rotation));
+                    PlayerNetworkObject nObj = obj.GetComponent<PlayerNetworkObject>();
+                    if(nObj != null) players[id] = nObj;
+                    else Debug.LogError("Network object not found");
+                }
+            }
+        }
+    }
+
+    void onMessageRecieve(ServerMessage msg)
+    {
+        if (msg.type == ServerMessageType.WELCOME && msg.id != null)
+        {
+            playerId = msg.id;
+            players[playerId] = Player.playerInstance.GetComponent<PlayerNetworkObject>();
+            hasPlayerId = true;
+
+            if(msg.players != null) spawnPlayer(msg);
+        }
+
+        if (msg.type == ServerMessageType.PLAYER_JOIN && msg.players != null)
+        {
+            spawnPlayer(msg);
+        }
+
+        if (msg.players != null && msg.type == ServerMessageType.UPDATE)
+        {
+            foreach (string id in players.Keys)
+            {
+                if (id != playerId) players[id].UpdateTransforms(msg.players[id]);
+                else players[id].UpdatePosition(msg.players[id].position);
+            }
+        }
     }
 }

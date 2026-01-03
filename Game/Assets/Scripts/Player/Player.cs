@@ -164,12 +164,6 @@ public class Player : MonoBehaviour
         if (gun != null) gun.setInput(shoot);
     }
 
-    public void movePlayer(ServerMessage msg)
-    {
-        Debug.Log("changing player position");
-        transform.DOMove(msg.position, 1f);
-    }
-
     void moveFunc()
     {
         Vector3 moveDirection = moveDirWSAD * playerStats.getStat(StatTypes.speed) * Time.fixedDeltaTime;

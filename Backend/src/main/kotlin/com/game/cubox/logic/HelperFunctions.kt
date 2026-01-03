@@ -1,4 +1,4 @@
 package com.game.cubox.logic
 
-class PlayerPosition {
+class HelperFunctions {
 }
