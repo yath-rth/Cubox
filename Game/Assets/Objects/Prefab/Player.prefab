@@ -5430,7 +5430,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8199227693549477220
 Transform:
   m_ObjectHideFlags: 0
@@ -5761,6 +5761,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerNetworkObject
   id: 
+  graphics: {fileID: 1677935723111816302}
 --- !u!114 &4573877150082156093
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5775,8 +5776,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gunTypes:
   - {fileID: 11400000, guid: 8d64c3cc0aab24d46b7507c4e5daa9e0, type: 2}
-  - {fileID: 11400000, guid: e10b4ccfaceae1b478a96e163f7e3e27, type: 2}
-  - {fileID: 11400000, guid: 0f7de88d5ec251643a082e47370cfb3b, type: 2}
   activeGun: {fileID: 0}
   isReloading: 0
   currAmmo: 0

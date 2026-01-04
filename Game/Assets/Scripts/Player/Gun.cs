@@ -13,7 +13,7 @@ public class Gun : MonoBehaviour
     public int currAmmo = 0;
 
     float canFire, input;
-    
+
 
     [SerializeField] Vector3 reloadRotation;
     public Transform gunParent;
@@ -48,8 +48,11 @@ public class Gun : MonoBehaviour
         if (activeGun == null) activeGun = gunTypes[Random.Range(0, gunTypes.Count)];
         SetUpGun();
 
-        player.newInput.WSAD.Shoot.performed += _ => StartCoroutine(Shoot());
-        player.playerStats.setStat(StatTypes.damage, activeGun.getStat(StatTypes.damage));
+        if(player != null)
+        {
+            //player.newInput.WSAD.Shoot.performed += _ => StartCoroutine(Shoot());
+            player.playerStats.setStat(StatTypes.damage, activeGun.getStat(StatTypes.damage));
+        }
     }
 
     public void SetUpGun()
@@ -80,13 +83,13 @@ public class Gun : MonoBehaviour
             }
 
             currAmmo = activeGun.ammo;
-            player.playerStats.setStat(StatTypes.damage, activeGun.getStat(StatTypes.damage));
+            if (player != null) player.playerStats.setStat(StatTypes.damage, activeGun.getStat(StatTypes.damage));
         }
     }
 
     private void Update()
     {
-        if (!player.Alive) return;
+        if (player != null) if (!player.Alive) return;
 
         if (isReloading) return;
 
@@ -104,7 +107,7 @@ public class Gun : MonoBehaviour
             StartCoroutine(Shoot());
         }
 
-        player.playerStats.setStat(StatTypes.damage, activeGun.getStat(StatTypes.damage));
+        if (player != null) player.playerStats.setStat(StatTypes.damage, activeGun.getStat(StatTypes.damage));
 
     }
 

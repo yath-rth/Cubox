@@ -42,8 +42,8 @@ public class Player : MonoBehaviour
     float canRegen, shoot;
     int temp;
     Vector2 move;
-    InputType currInput = InputType.NONE;
-    InputType prevInput = InputType.FRONT;
+    InputDir currInput = InputDir.NONE;
+    InputDir prevInput = InputDir.FRONT;
 
 
     private void Awake()
@@ -70,9 +70,11 @@ public class Player : MonoBehaviour
 
         graphics.SetActive(true);
 
-        if (newInput != null && inventoryUI != null)
+        if (newInput != null)
         {
-            newInput.WSAD.Inventory.performed += _ => { inventoryUI.SetActive(!inventoryUI.activeInHierarchy); };
+            if (inventoryUI != null) newInput.WSAD.Inventory.performed += _ => { inventoryUI.SetActive(!inventoryUI.activeInHierarchy); };
+
+            newInput.WSAD.Shoot.performed += _ => Shoot();
         }
     }
 
@@ -128,11 +130,6 @@ public class Player : MonoBehaviour
         CheckHealthPlayer();
     }
 
-    private void FixedUpdate()
-    {
-        //if (Alive) moveFunc();
-    }
-
     void input()
     {
         move = newInput.WSAD.Movement.ReadValue<Vector2>();
@@ -140,19 +137,21 @@ public class Player : MonoBehaviour
 
         if (ConnectionManager.instance != null)
         {
-            if (move.x > 0 && move.y == 0) currInput = InputType.RIGHT;
-            else if (move.x < 0 && move.y == 0) currInput = InputType.LEFT;
-            else if (move.x == 0 && move.y > 0) currInput = InputType.FRONT;
-            else if (move.x == 0 && move.y < 0) currInput = InputType.BACK;
-            else if (move.x > 0 && move.y > 0) currInput = InputType.FRIGHT;
-            else if (move.x < 0 && move.y > 0) currInput = InputType.FLEFT;
-            else if (move.x > 0 && move.y < 0) currInput = InputType.BRIGHT;
-            else if (move.x < 0 && move.y < 0) currInput = InputType.BLEFT;
-            else currInput = InputType.NONE;
+            if (move.x > 0 && move.y == 0) currInput = InputDir.RIGHT;
+            else if (move.x < 0 && move.y == 0) currInput = InputDir.LEFT;
+            else if (move.x == 0 && move.y > 0) currInput = InputDir.FRONT;
+            else if (move.x == 0 && move.y < 0) currInput = InputDir.BACK;
+            else if (move.x > 0 && move.y > 0) currInput = InputDir.FRIGHT;
+            else if (move.x < 0 && move.y > 0) currInput = InputDir.FLEFT;
+            else if (move.x > 0 && move.y < 0) currInput = InputDir.BRIGHT;
+            else if (move.x < 0 && move.y < 0) currInput = InputDir.BLEFT;
+            else currInput = InputDir.NONE;
 
-            if(currInput != prevInput)
+            // NEED TO CHANGE THIS LOGIC CAN SIMPLY SEND THE VECTOR3 AS INPUT I AM PURELY DUMB WHAT THE FUCK IS THIS WHY WOULD YOU DO SUCH A LONG AND CUBERSOME METHOD MY GOD
+
+            if (currInput != prevInput)
             {
-                ConnectionManager.instance.SendInput(currInput);
+                ConnectionManager.instance.SendInput(InputType.MOVE, currInput);
                 prevInput = currInput;
             }
             //else ConnectionManager.instance.SendInput(InputType.NONE);
@@ -162,6 +161,11 @@ public class Player : MonoBehaviour
 
         shoot = newInput.WSAD.Shoot.ReadValue<float>();
         if (gun != null) gun.setInput(shoot);
+    }
+
+    void Shoot()
+    {
+        ConnectionManager.instance.SendInput(InputType.SHOOT, InputDir.NONE);
     }
 
     void moveFunc()
@@ -266,7 +270,7 @@ public class Player : MonoBehaviour
             if (canRegen <= Time.time)
             {
                 canRegen = Time.time + 5f;
-                temp = (2 / 100) * playerStats.getStat(StatTypes.maxhitpoints);
+                temp = 2 / 100 * playerStats.getStat(StatTypes.maxhitpoints);
                 temp = Mathf.Clamp(temp, 0, playerStats.getStat(StatTypes.maxhitpoints));
 
                 playerStats.setStat(StatTypes.hitpoints, playerStats.getStat(StatTypes.hitpoints) + temp);

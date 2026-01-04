@@ -32,7 +32,7 @@ public class GameColorManager : MonoBehaviour
         }
         mapColors[1] = colors[tmp];
 
-        setColor();
+        //setColor();
 
         return mapColors;
     }

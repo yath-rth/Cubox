@@ -1,4 +1,4 @@
-public enum InputType
+public enum InputDir
 {
     NONE,
     FRONT,
@@ -9,6 +9,11 @@ public enum InputType
     FLEFT,
     BRIGHT,
     BLEFT
+}
+
+public enum InputType
+{
+    NONE, MOVE, SHOOT
 }
 
 public enum ServerMessageType

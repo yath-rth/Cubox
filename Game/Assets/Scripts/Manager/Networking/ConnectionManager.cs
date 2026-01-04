@@ -10,8 +10,9 @@ using System.Data.Common;
 public class ConnectionManager : MonoBehaviour
 {
     public static ConnectionManager instance;
+    BulletManager bulletMan;
     WebSocket ws;
-    public String playerId { get; private set; }
+    public string playerId;
     [SerializeField] GameObject playerPrefab;
     Dictionary<string, PlayerNetworkObject> players = new Dictionary<string, PlayerNetworkObject>();
 
@@ -21,6 +22,8 @@ public class ConnectionManager : MonoBehaviour
     {
         if (instance != null) Destroy(this);
         instance = this;
+
+        bulletMan = GetComponent<BulletManager>();
     }
 
     async void Start()
@@ -66,13 +69,13 @@ public class ConnectionManager : MonoBehaviour
 #endif
     }
 
-    public async void SendInput(InputType input)
+    public async void SendInput(InputType type, InputDir input)
     {
         if (!hasPlayerId) return;
 
         if (ws.State == WebSocketState.Open)
         {
-            ClientMessage pim = new ClientMessage(playerId, input);
+            ClientMessage pim = new ClientMessage(playerId, type, input, Player.playerInstance.transform.eulerAngles);
             await ws.SendText(JsonConvert.SerializeObject(pim, Formatting.None, new JsonSerializerSettings()
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
@@ -111,7 +114,11 @@ public class ConnectionManager : MonoBehaviour
                 {
                     GameObject obj = Instantiate(playerPrefab, msg.players[id].position, Quaternion.Euler(msg.players[id].rotation));
                     PlayerNetworkObject nObj = obj.GetComponent<PlayerNetworkObject>();
-                    if(nObj != null) players[id] = nObj;
+                    if (nObj != null)
+                    {
+                        nObj.SetUp(msg, id);
+                        players[id] = nObj;
+                    }
                     else Debug.LogError("Network object not found");
                 }
             }
@@ -124,9 +131,11 @@ public class ConnectionManager : MonoBehaviour
         {
             playerId = msg.id;
             players[playerId] = Player.playerInstance.GetComponent<PlayerNetworkObject>();
+            if (players[playerId] != null) players[playerId].SetUp(msg, playerId);
             hasPlayerId = true;
 
-            if(msg.players != null) spawnPlayer(msg);
+            if (msg.mapSize != null) grid.Grid.SetUpWorldGrid(msg.mapSize);
+            if (msg.players != null) spawnPlayer(msg);
         }
 
         if (msg.type == ServerMessageType.PLAYER_JOIN && msg.players != null)
@@ -141,6 +150,8 @@ public class ConnectionManager : MonoBehaviour
                 if (id != playerId) players[id].UpdateTransforms(msg.players[id]);
                 else players[id].UpdatePosition(msg.players[id].position);
             }
+
+            bulletMan.updateBullets(msg);
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Cinemachine;
@@ -41,11 +42,6 @@ public class grid : MonoBehaviour
         {
             Grid = this;
         }
-
-        positions = new List<GameObject>((int)(mapsize.x * mapsize.y));
-        tileScripts = new List<Tile>((int)(mapsize.x * mapsize.y));
-
-        GenerateGrid();
     }
 
     private void OnDestroy()
@@ -61,14 +57,23 @@ public class grid : MonoBehaviour
         return new Vector3(-mapsize.x / 2f + 0.5f + x, 0, -mapsize.y / 2f + 0.5f + y) * tileSize;
     }
 
+    public void SetUpWorldGrid(Dictionary<String, int> mapSize)
+    {
+        mapsize = new Vector2(mapSize["X"], mapSize["Y"]);
+        maxSizeX = mapSize["MaxX"];
+        maxSizeY = mapSize["MaxY"];
+
+        positions = new List<GameObject>((int)(mapsize.x * mapsize.y));
+        tileScripts = new List<Tile>((int)(mapsize.x * mapsize.y));
+
+        GenerateGrid();
+    }
+
     public void GenerateGrid()
     {
         Color[] colors = colorManager.getColor();
         backgroundColor = colors[0];
         foregroundColor = colors[1];
-
-        mapsize = new Vector2(Random.Range(minSizeX, maxSizeX), Random.Range(minSizeY, maxSizeY));
-        Maxmapsize = new Vector2(maxSizeX, maxSizeY);
 
         string holderName = "Generated Map";
         if (transform.Find(holderName))
@@ -167,7 +172,7 @@ public class grid : MonoBehaviour
 
     public GameObject getRandomPos()
     {
-        return positions[Random.Range(0, positions.Count)];
+        return positions[UnityEngine.Random.Range(0, positions.Count)];
     }
 
     CinemachineTargetGroup.Target newTarget(Transform obj)
