@@ -36,12 +36,4 @@ public class GameColorManager : MonoBehaviour
 
         return mapColors;
     }
-
-    void setColor()
-    {
-        colorPlayer = new Color(mapColors[1].r - playerTint, mapColors[1].g - playerTint, mapColors[1].b - playerTint, mapColors[1].a);
-        playerColor.SetColor("_color", colorPlayer);
-
-        if (player != null) player.setPlayerColor(colorPlayer);
-    }
 }

@@ -7,7 +7,6 @@ using UnityEngine.Events;
 public class EnemySpawner : MonoBehaviour
 {
     Player player;
-    Points points;
     ObjectPooler pool;
     grid Grid;
     int enemiesKilled = 0;
@@ -34,7 +33,6 @@ public class EnemySpawner : MonoBehaviour
     {
         player = Player.playerInstance;
         pool = ObjectPooler.instance;
-        points = Points.instance;
         Grid = GetComponent<grid>();
 
         StartCoroutine(Wave());
@@ -69,7 +67,7 @@ public class EnemySpawner : MonoBehaviour
 
     private void Update()
     {
-        if (player.Alive)
+        if (player != null)
         {
             if (Time.time > nextCampCheckTime)
             {

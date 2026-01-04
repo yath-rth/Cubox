@@ -5582,6 +5582,7 @@ GameObject:
   - component: {fileID: 8043940793572899364}
   - component: {fileID: -6019356149744850939}
   - component: {fileID: 4573877150082156093}
+  - component: {fileID: 6704665911290270806}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -5782,6 +5783,22 @@ MonoBehaviour:
   reloadRotation: {x: -180, y: 0, z: 0}
   gunParent: {fileID: 5424099008198757185}
   muzzle: []
+--- !u!114 &6704665911290270806
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6037498542443110057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6700d244ba5517b46ba0833f9216986d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DamageableItem
+  health: 0
+  graphics: {fileID: 1677935723111816302}
+  deathEffect: {fileID: 1514925791804735206}
+  Alive: 0
 --- !u!1 &7194676507726515449
 GameObject:
   m_ObjectHideFlags: 0

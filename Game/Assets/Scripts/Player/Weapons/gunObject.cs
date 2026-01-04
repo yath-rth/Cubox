@@ -1,12 +1,8 @@
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Gun Object", order = 0)]
-public class gunObject : Stats, InventoryItemSO
+public class gunObject : Stats
 {
-    string InventoryItemSO.displayName { get => Name; }
-    Sprite InventoryItemSO.image{ get => sprite; }
-    int InventoryItemSO.quantity{ get => quantity; }
-
     public GameObject gun;
     string Name;
     public Sprite sprite;
@@ -24,21 +20,4 @@ public class gunObject : Stats, InventoryItemSO
     [Header("Activity")]
     public bool active;
     public bool infiniteAmmo = false;
-
-    public void EquipItem()
-    {
-        if (Player.playerInstance != null)
-        {
-            Player.playerInstance.gun.activeGun = this;
-            Player.playerInstance.gun.SetUpGun();
-        }
-    }
-
-    public void AddItem()
-    {
-        if (Inventory.instance != null)
-        {
-            Inventory.instance.objects.Add(this);
-        }
-    }
 }

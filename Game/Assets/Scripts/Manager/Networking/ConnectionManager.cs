@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.Data.Common;
+using System.Linq;
 
 
 public class ConnectionManager : MonoBehaviour
@@ -147,11 +148,23 @@ public class ConnectionManager : MonoBehaviour
         {
             foreach (string id in players.Keys)
             {
-                if (id != playerId) players[id].UpdateTransforms(msg.players[id]);
-                else players[id].UpdatePosition(msg.players[id].position);
+                if (id != playerId) players[id].UpdateTransforms(msg.players[id], true);
+                else players[id].UpdateTransforms(msg.players[id], false);
             }
 
             bulletMan.updateBullets(msg);
+        }
+
+        if(msg.type == ServerMessageType.PLAYER_EXIT)
+        {
+            if(msg.players == null) return;
+            foreach(string id in players.Keys.ToList())
+            {
+                if (!msg.players.ContainsKey(id))
+                {
+                    players.Remove(id);
+                }
+            }
         }
     }
 }

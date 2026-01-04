@@ -31,7 +31,7 @@ public class Dash : MonoBehaviour
     {
         if(player.dashing) return;
 
-        if (canDash <= Time.time && player.Alive)
+        if (canDash <= Time.time && player != null)
         {
             if (player.getDashInput() > 0)
             {
@@ -45,7 +45,6 @@ public class Dash : MonoBehaviour
     {
         agent.enabled = true;
         UnityEngine.AI.NavMeshHit hit;
-        player.ShouldTakeDamage = false;
         player.dashing = true;
 
         input = player.getMoveInput().normalized;
@@ -66,7 +65,6 @@ public class Dash : MonoBehaviour
             if (Vector3.Distance(transform.position, dashpos) < .05f)
             {
                 agent.enabled = true;
-                player.ShouldTakeDamage = true;
                 player.dashing = false;
                 yield break;
             }

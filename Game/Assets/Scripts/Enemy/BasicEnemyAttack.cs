@@ -52,11 +52,6 @@ public class BasicEnemyAttack : MonoBehaviour
             yield return null;
         }
 
-        if (!player.dashing)
-        {
-            StartCoroutine(player.takeDamagePlayer(damage));
-        }
-
         render.enabled = false;
         yield return new WaitForSeconds(.25f);
 

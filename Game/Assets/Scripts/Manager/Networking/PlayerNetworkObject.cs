@@ -5,7 +5,8 @@ using UnityEngine;
 class PlayerNetworkObject : MonoBehaviour
 {
     public string id;
-    public MeshRenderer graphics;
+    [SerializeField] MeshRenderer graphics;
+    Color color;
 
     public void SetUp(ServerMessage msg, string id)
     {
@@ -15,7 +16,6 @@ class PlayerNetworkObject : MonoBehaviour
             MaterialPropertyBlock mat = new MaterialPropertyBlock();
             graphics.GetPropertyBlock(mat);
 
-            Color color;
             if (ColorUtility.TryParseHtmlString(msg.players[id].color, out color))
             {
                 mat.SetColor("_color", color);
@@ -25,14 +25,15 @@ class PlayerNetworkObject : MonoBehaviour
         }
     }
 
-    public void UpdateTransforms(PlayerDTO _transform)
+    public void UpdateTransforms(PlayerDTO _transform, bool both)
     {
-        transform.DOMove(_transform.position, 0.5f);
-        transform.DORotate(_transform.rotation, 0.3f);
-    }
+        transform.DOMove(_transform.position, 0.1f);
+        if(both) transform.DORotate(_transform.rotation, 0.3f);
 
-    public void UpdatePosition(Vector3 position)
-    {
-        transform.DOMove(position, 0.2f);
+        DamageableItem item = GetComponent<DamageableItem>();
+        if (item != null)
+        {
+            item.UpdateHealth(_transform.health, color);
+        }
     }
 }

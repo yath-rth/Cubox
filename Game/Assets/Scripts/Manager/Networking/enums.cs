@@ -21,6 +21,6 @@ public enum ServerMessageType
     WELCOME,
     UPDATE,
     PLAYER_JOIN,
-    PLAYER_LEAVE,
+    PLAYER_EXIT,
     EXIT
 }

@@ -57,7 +57,7 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-        if (player.Alive == true && isAlive == true)
+        if (player != null && isAlive == true)
         {
             move();
             checkHealth();
@@ -67,7 +67,7 @@ public class Enemy : MonoBehaviour
 
     void move()
     {
-        if ((player.gameObject.transform.position - transform.position).magnitude > attackDis && player.Alive && !attacking)
+        if ((player.gameObject.transform.position - transform.position).magnitude > attackDis && player != null && !attacking)
         {
             transform.LookAt(player.gameObject.transform);
             navAgent.enabled = true;
@@ -230,6 +230,7 @@ public class Enemy : MonoBehaviour
         col.enabled = true;
         attacking = false;
     }
+    
 
     public int getDamage()
     {

@@ -89,7 +89,7 @@ public class Gun : MonoBehaviour
 
     private void Update()
     {
-        if (player != null) if (!player.Alive) return;
+        //if (player != null) if (!player) return;
 
         if (isReloading) return;
 

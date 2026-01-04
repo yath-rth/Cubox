@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 
@@ -39,7 +40,7 @@ class BulletManager : MonoBehaviour
             }
         }
 
-        foreach (string id in bullets.Keys)
+        foreach (string id in bullets.Keys.ToList())
         {
             if (!msg.bullets.ContainsKey(id))
             {

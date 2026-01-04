@@ -64,9 +64,8 @@ public class UIManager : MonoBehaviour
             reloadingUI.SetActive(false);
         }
 
-        if (!player.Alive)
+        if (player != null)
         {
-            highScoreUI.text = Save.playerData.HighScore.ToString();
             allUI.SetActive(false);
             DeathMenu.SetActive(true);
         }

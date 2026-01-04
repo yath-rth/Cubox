@@ -47,6 +47,7 @@ public class PlayerDTO
     public Vector3 position;
     public Vector3 rotation;
     public string color;
+    public int health;
 }
 
 public class BulletDTO

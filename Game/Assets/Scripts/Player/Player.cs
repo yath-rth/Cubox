@@ -15,6 +15,7 @@ public class Player : MonoBehaviour
     Vector2 look;
     Quaternion lookDir;
     Transform cube;
+    DamageableItem item;
 
     public PlayerInput newInput;
 
@@ -27,7 +28,6 @@ public class Player : MonoBehaviour
 
     [Header("Player Properties")]
     Color playerColor;
-    public float damageSpeed;
     public Color flashColour;
 
     [Header("Crosshair")]
@@ -36,11 +36,8 @@ public class Player : MonoBehaviour
     [SerializeField] Transform crossHairVisual;
 
     [Header("Player Stats")]
-    [HideInInspector] public bool ShouldTakeDamage = true, dashing = false;
-    public bool Alive = true;
-    [HideInInspector] public bool WallBang = false, shouldRegen;
-    float canRegen, shoot;
-    int temp;
+    [HideInInspector] public bool dashing = false;
+    [HideInInspector] public bool WallBang = false;
     Vector2 move;
     InputDir currInput = InputDir.NONE;
     InputDir prevInput = InputDir.FRONT;
@@ -59,6 +56,7 @@ public class Player : MonoBehaviour
             playerInstance = this;
         }
 
+        item = GetComponent<DamageableItem>();
         rb = GetComponent<Rigidbody>();
         agent = GetComponent<NavMeshAgent>();
         gun = GetComponent<Gun>();
@@ -98,7 +96,7 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        if (Alive)
+        if (item.GetAlive())
         {
             input();
             rotate();
@@ -126,8 +124,6 @@ public class Player : MonoBehaviour
                 transform.eulerAngles = new Vector3(0, transform.eulerAngles.y, 0);
             } */
         }
-
-        CheckHealthPlayer();
     }
 
     void input()
@@ -158,9 +154,6 @@ public class Player : MonoBehaviour
         }
 
         moveDirWSAD = new Vector3(move.x, 0, move.y).normalized;
-
-        shoot = newInput.WSAD.Shoot.ReadValue<float>();
-        if (gun != null) gun.setInput(shoot);
     }
 
     void Shoot()
@@ -218,99 +211,9 @@ public class Player : MonoBehaviour
         }
     }
 
-    public IEnumerator takeDamagePlayer(int damage)
-    {
-        if (ShouldTakeDamage == true)
-        {
-            float damageTimer = 0;
-            Material newTileMat = visual.sharedMaterial;
-
-            while (damageTimer < .25f)
-            {
-                newTileMat.SetColor("_color", Color.Lerp(playerColor, flashColour, Mathf.PingPong(damageTimer * damageSpeed, 1)));
-
-                damageTimer += Time.deltaTime;
-
-                yield return null;
-            }
-
-            newTileMat.SetColor("_color", playerColor);
-
-
-            playerStats.setStat(StatTypes.hitpoints, (int)Mathf.Clamp(
-                        playerStats.getStat(StatTypes.hitpoints) - damage, 0, playerStats.getStat(StatTypes.hitpoints)));
-
-            CheckHealthPlayer();
-        }
-    }
-
-    void CheckHealthPlayer()
-    {
-
-        if (playerStats.getStat(StatTypes.hitpoints) > playerStats.getStat(StatTypes.maxhitpoints))
-        {
-            playerStats.setStat(StatTypes.hitpoints, playerStats.getStat(StatTypes.maxhitpoints));
-            Alive = true;
-        }
-        else if (playerStats.getStat(StatTypes.hitpoints) > 0)
-        {
-            Alive = true;
-        }
-        else if (playerStats.getStat(StatTypes.hitpoints) <= 0)
-        {
-            Debug.Log("U have died");
-            Alive = false;
-            graphics.SetActive(false);
-            deathEffect.SetActive(true);
-        }
-
-
-        if (shouldRegen && Alive)
-        {
-            if (canRegen <= Time.time)
-            {
-                canRegen = Time.time + 5f;
-                temp = 2 / 100 * playerStats.getStat(StatTypes.maxhitpoints);
-                temp = Mathf.Clamp(temp, 0, playerStats.getStat(StatTypes.maxhitpoints));
-
-                playerStats.setStat(StatTypes.hitpoints, playerStats.getStat(StatTypes.hitpoints) + temp);
-            }
-        }
-    }
-
     public float GetDamage()
     {
         return playerStats.getStat(StatTypes.damage);
-    }
-
-    public bool ShouldShoot()
-    {
-        if (newInput.WSAD.Shoot.ReadValue<float>() > 0) return true;
-        else return false;
-    }
-
-    public GameObject GetGameobject()
-    {
-        return gameObject;
-    }
-
-    IEnumerator LerpPos(Transform obj, Vector3 posA, Vector3 posB, float duration, float speed)
-    {
-        float time = 0;
-
-        while (time < duration)
-        {
-            obj.transform.localPosition = Vector3.Lerp(posA, posB, time * speed);
-            time += Time.deltaTime;
-            yield return null;
-        }
-
-        obj.transform.position = posB;
-    }
-
-    public void setPlayerColor(Color color)
-    {
-        playerColor = color;
     }
 
     public Vector3 getMoveInput()
