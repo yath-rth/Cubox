@@ -7435,6 +7435,9 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  seed: 100
+  obstacle: {fileID: 8333293462737964754, guid: d3f264dfcdddeff4eab637cff69a8617, type: 3}
+  scaleValue: {x: 1, y: 1, z: 1}
 --- !u!114 &443097810
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31167,11 +31170,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87ea6da26cc41504b9a23e3eea183244, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pos: {x: 0, y: 0, z: 0}
-  pos1: {x: 0, y: 0, z: 0}
-  pos2: {x: 0, y: 0, z: 0}
-  followObj: {fileID: 4060016912308130637}
-  offset: {x: 0, y: 0, z: 0}
 --- !u!114 &1935403210
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -34301,9 +34299,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 420bd1a22813dc0408d89c16a80a2b3f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inventory: {fileID: 0}
-  itemTileUI: {fileID: 3219163194067301185, guid: ed5006a4da6f0ec4782c48530a457b0a, type: 3}
-  itemTileParent: {fileID: 1711784071243281606}
 --- !u!114 &6135284870126248287
 MonoBehaviour:
   m_ObjectHideFlags: 0
