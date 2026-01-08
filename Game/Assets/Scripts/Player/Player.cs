@@ -72,7 +72,9 @@ public class Player : MonoBehaviour
         {
             if (inventoryUI != null) newInput.WSAD.Inventory.performed += _ => { inventoryUI.SetActive(!inventoryUI.activeInHierarchy); };
 
-            newInput.WSAD.Shoot.performed += _ => Shoot();
+            newInput.WSAD.Shoot.performed += _ => startShoot();
+            newInput.WSAD.Shoot.canceled += _ => endShoot();
+
         }
     }
 
@@ -156,9 +158,14 @@ public class Player : MonoBehaviour
         moveDirWSAD = new Vector3(move.x, 0, move.y).normalized;
     }
 
-    void Shoot()
+    void startShoot()
     {
-        ConnectionManager.instance.SendInput(InputType.SHOOT, InputDir.NONE);
+        ConnectionManager.instance.SendShootInput(InputType.SHOOT, 1);
+    }
+
+    void endShoot()
+    {
+        ConnectionManager.instance.SendShootInput(InputType.SHOOT, 0);
     }
 
     void moveFunc()

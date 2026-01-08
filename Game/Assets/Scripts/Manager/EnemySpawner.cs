@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using DG.Tweening;
+using System.Linq;
 
 public class EnemySpawner : MonoBehaviour
 {
@@ -29,13 +31,15 @@ public class EnemySpawner : MonoBehaviour
     private Vector3 campPositionOld;
     public float campThresholdDistance;
 
+    Dictionary<string, GameObject> enemies = new Dictionary<string, GameObject>();
+
     private void Start()
     {
         player = Player.playerInstance;
         pool = ObjectPooler.instance;
         Grid = GetComponent<grid>();
 
-        StartCoroutine(Wave());
+        //StartCoroutine(Wave());
     }
 
     private void OnEnable()
@@ -65,59 +69,80 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
-    private void Update()
+    public void updateEnemies(ServerMessage msg)
     {
-        if (player != null)
+        if (msg.enemies == null) return;
+
+        foreach (string id in msg.enemies.Keys)
         {
-            if (Time.time > nextCampCheckTime)
+            if (!enemies.ContainsKey(id) && ObjectPooler.instance != null)
             {
-                nextCampCheckTime = Time.time + timeBetweenCampingChecks;
-
-                isCamping = (Vector3.Distance(player.gameObject.transform.position, campPositionOld) < campThresholdDistance);
-                campPositionOld = player.gameObject.transform.position;
+                StartCoroutine(SpawnEnemy(msg, id));
             }
 
+            if(enemies[id] == null) continue;
 
-            if (enemiesKilled > (wave * waveSpeed) && enemiesKilled < ((wave + 1) * waveSpeed) && enemiesKilled != 0)
+            //enemies[id].transform.position = msg.enemies[id].position;
+            enemies[id].transform.DOMove(msg.enemies[id].position, 0.2f);
+            enemies[id].transform.LookAt(msg.enemies[id].direction);
+        }
+
+        foreach (string id in enemies.Keys.ToList())
+        {
+            if (!msg.enemies.ContainsKey(id))
             {
-                spawnTime = Mathf.Clamp(spawnTime - spawnTimeDecrease, .1f, spawnTime);
-                //maxEnemy = Mathf.Clamp(maxEnemy + 5, 0, 25);
-                wave++;
-            }
+                if (ObjectPooler.instance == null) continue;
 
-            if (isCamping) Debug.Log("U camper");
+                enemies[id].transform.parent = pool.transform;
+                pool.ReturnObject(enemies[id], 2);
+                enemies.Remove(id);
+            }
         }
     }
 
-    IEnumerator Wave()
+    // private void Update()
+    // {
+    //     if (player != null)
+    //     {
+    //         if (Time.time > nextCampCheckTime)
+    //         {
+    //             nextCampCheckTime = Time.time + timeBetweenCampingChecks;
+
+    //             isCamping = (Vector3.Distance(player.gameObject.transform.position, campPositionOld) < campThresholdDistance);
+    //             campPositionOld = player.gameObject.transform.position;
+    //         }
+
+
+    //         if (enemiesKilled > (wave * waveSpeed) && enemiesKilled < ((wave + 1) * waveSpeed) && enemiesKilled != 0)
+    //         {
+    //             spawnTime = Mathf.Clamp(spawnTime - spawnTimeDecrease, .1f, spawnTime);
+    //             //maxEnemy = Mathf.Clamp(maxEnemy + 5, 0, 25);
+    //             wave++;
+    //         }
+
+    //         if (isCamping) Debug.Log("U camper");
+    //     }
+    // }
+
+    // //IEnumerator Wave()
+    // {
+    //     while (player.playerStats.getStat(StatTypes.hitpoints) > 0)
+    //     {
+    //         if (enemiesCount <= maxEnemy)
+    //         {
+    //             StartCoroutine(SpawnEnemy());
+    //         }
+
+    //         yield return new WaitForSeconds(spawnTime);
+    //     }
+    // }
+
+    IEnumerator SpawnEnemy(ServerMessage msg, string id)
     {
-        while (player.playerStats.getStat(StatTypes.hitpoints) > 0)
-        {
-            if (enemiesCount <= maxEnemy)
-            {
-                StartCoroutine(SpawnEnemy());
-            }
-
-            yield return new WaitForSeconds(spawnTime);
-        }
-    }
-
-    IEnumerator SpawnEnemy()
-    {
-        //Vector3 spawnPos = GetRandomPointAbove(GetComponent<BoxCollider>());
-
         float spawnTimer = 0;
-        GameObject newTile;
-
-        if (!isCamping)
-        {
-            newTile = Grid.getRandomPos();
-        }
-        else
-        {
-            //newTile = Grid.getRandomPosNearPlayer();
-            newTile = Grid.getRandomPos();
-        }
+        GameObject newTile = Grid.getTileAtPosition(msg.enemies[id].position);
+        
+        enemies[id] = null;
 
         if (newTile != null)
         {
@@ -132,56 +157,14 @@ public class EnemySpawner : MonoBehaviour
             }
 
             newTileMat.SetFloat("Amt_Of_Outline", 2);
-
-            if (newTile != null)
-            {
-                Vector3 spawnPos = newTile.transform.position + new Vector3(0, 1, 0);
-                GameObject enemy = pool.GetObject(2);
-
-                if (enemy != null)
-                {
-                    enemy.transform.position = spawnPos;
-                    Enemy enemy_script = enemy.GetComponent<Enemy>();
-
-                    int x = RandomVal.GetRandmVal(enemyTypes);
-                    if (x == 3)
-                    {
-                        if (richEnemy < 3)
-                        {
-                            enemy_script.SetProperties(x, enemySpeed);
-                            richEnemy++;
-                        }
-                        else
-                        {
-                            x = RandomVal.GetRandmVal(enemyTypes);
-                            enemy_script.SetProperties(x, enemySpeed);
-                        }
-                    }
-                    else
-                    {
-                        enemy_script.SetProperties(x, enemySpeed);
-                    }
-
-                    enemiesCount++;
-                    yield return null;
-                }
-            }
         }
-    }
 
-    Vector3 GetRandomPointAbove(BoxCollider mesh)
-    {
-        float minx = mesh.bounds.min.x;
-        float minz = mesh.bounds.min.z;
-        float maxx = mesh.bounds.max.x;
-        float maxz = mesh.bounds.max.z;
-        float x = UnityEngine.Random.Range(minx, maxx);
-        float y = 0;
-        float z = UnityEngine.Random.Range(minz, maxz);
-        var localPos = new Vector3(x, y, z);
-        return transform.TransformPoint(localPos);
+        GameObject enemy = pool.GetObject(2);
+        enemy.transform.position = msg.enemies[id].position;
+        enemy.transform.LookAt(msg.enemies[id].direction);
+        enemies[id] = enemy;
     }
 }
 
 [Serializable]
-public class EnemyAttack : UnityEvent<int> {}
+public class EnemyAttack : UnityEvent<int> { }

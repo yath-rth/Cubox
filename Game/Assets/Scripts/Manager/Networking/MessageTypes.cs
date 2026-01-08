@@ -5,25 +5,34 @@ using UnityEngine;
 [Serializable]
 public class ClientMessage
 {
-    public String playerId;
+    public string playerId;
     public InputType? inputType = null;
+    public int? shootInput = null;
     public InputDir? input = null;
     public RotationDTO? rotation = null;
 
-    public ClientMessage(String id, InputType type, InputDir input)
+    public ClientMessage(string id, InputType type, InputDir input)
     {
         playerId = id;
-        this.inputType = type;
+        inputType = type;
         this.input = input;
     }
 
-    public ClientMessage(String id, Vector3 rotation)
+    public ClientMessage(string id, Vector3 rotation)
     {
         playerId = id;
         this.rotation = new RotationDTO(rotation);
     }
 
-    public ClientMessage(String id, InputType type, InputDir input, Vector3 rotation)
+    public ClientMessage(string id, InputType type, int shootInput, Vector3 rotation)
+    {
+        playerId = id;
+        inputType = type;
+        this.shootInput = shootInput;
+        this.rotation = new RotationDTO(rotation);
+    }
+
+    public ClientMessage(string id, InputType type, InputDir input, Vector3 rotation)
     {
         playerId = id;
         inputType = type;
@@ -36,10 +45,11 @@ public class ClientMessage
 public class ServerMessage
 {
     public ServerMessageType type;
-    public String id = null;
-    public Dictionary<String, int> mapSize = null;
-    public Dictionary<String, PlayerDTO> players = null;
-    public Dictionary<String, BulletDTO> bullets = null;
+    public string id = null;
+    public Dictionary<string, int> mapSize = null;
+    public Dictionary<string, PlayerDTO> players = null;
+    public Dictionary<string, BulletDTO> bullets = null;
+    public Dictionary<string, EnemyDTO> enemies = null;
 }
 
 public class PlayerDTO
@@ -55,6 +65,12 @@ public class BulletDTO
     public Vector3 position;
     public Vector3 direction;
     public float lifetime;
+}
+
+public class EnemyDTO
+{
+    public Vector3 position;
+    public Vector3 direction;
 }
 
 public class RotationDTO

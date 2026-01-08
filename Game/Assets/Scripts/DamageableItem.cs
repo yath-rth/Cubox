@@ -6,6 +6,7 @@ public class DamageableItem : MonoBehaviour
     [SerializeField] int health;
     [SerializeField] MeshRenderer graphics;
     [SerializeField] GameObject deathEffect;
+    [SerializeField] HealthBar healthBar;
     [SerializeField] bool Alive;
 
     public void UpdateHealth(int health, Color color)
@@ -13,6 +14,7 @@ public class DamageableItem : MonoBehaviour
         if (this.health > health) StartCoroutine(TakeDamage(health, color));
         this.health = health;
         CheckObjectHealth();
+        if(healthBar != null) if(healthBar.isActiveAndEnabled) healthBar.UpdateHealthBar(this.health);
     }
 
     public bool GetAlive()

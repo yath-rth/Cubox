@@ -12,6 +12,7 @@ public class ConnectionManager : MonoBehaviour
 {
     public static ConnectionManager instance;
     BulletManager bulletMan;
+    EnemySpawner enemySpawn;
     WebSocket ws;
     public string playerId;
     [SerializeField] GameObject playerPrefab;
@@ -25,6 +26,7 @@ public class ConnectionManager : MonoBehaviour
         instance = this;
 
         bulletMan = GetComponent<BulletManager>();
+        enemySpawn = GetComponent<EnemySpawner>();
     }
 
     async void Start()
@@ -68,6 +70,21 @@ public class ConnectionManager : MonoBehaviour
 #if !UNITY_WEBGL || UNITY_EDITOR
         ws.DispatchMessageQueue();
 #endif
+    }
+
+    public async void SendShootInput(InputType type, int shootInput)
+    {
+        if(!hasPlayerId) return;
+
+        if(ws.State == WebSocketState.Open)
+        {
+            ClientMessage cm = new ClientMessage(playerId, type, shootInput, Player.playerInstance.transform.eulerAngles);
+            await ws.SendText(JsonConvert.SerializeObject(cm, Formatting.None, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                NullValueHandling = NullValueHandling.Ignore
+            }));
+        }
     }
 
     public async void SendInput(InputType type, InputDir input)
@@ -128,6 +145,8 @@ public class ConnectionManager : MonoBehaviour
 
     void onMessageRecieve(ServerMessage msg)
     {
+        //Debug.Log(msg.players == null);
+
         if (msg.type == ServerMessageType.WELCOME && msg.id != null)
         {
             playerId = msg.id;
@@ -148,11 +167,14 @@ public class ConnectionManager : MonoBehaviour
         {
             foreach (string id in players.Keys)
             {
+                if(!players.ContainsKey(id)) continue;
+
                 if (id != playerId) players[id].UpdateTransforms(msg.players[id], true);
                 else players[id].UpdateTransforms(msg.players[id], false);
             }
 
             bulletMan.updateBullets(msg);
+            enemySpawn.updateEnemies(msg);
         }
 
         if(msg.type == ServerMessageType.PLAYER_EXIT)

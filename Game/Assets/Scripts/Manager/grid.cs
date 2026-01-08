@@ -37,14 +37,6 @@ public class grid : MonoBehaviour
 
     List<Tile> tileScripts;
     List<Transform> mapBlockers;
-
-    Coord mapCentre;
-    Queue<Coord> ShuffledArray;
-
-    // ---- Added fields ----
-    List<Coord> allTileCoords = new List<Coord>();
-    List<Coord> OpenCoord = new List<Coord>();
-
     public int seed = 0;
     System.Random prng;
 
@@ -133,63 +125,6 @@ public class grid : MonoBehaviour
             }
         }
 
-        bool[,] obstacleMap = new bool[(int)mapsize.x, (int)mapsize.y];
-        int obstacleCount = (int)(mapsize.x * mapsize.y * .6);
-        int currentObstacleCount = 0;
-
-        allTileCoords.Clear();
-        OpenCoord.Clear();
-
-        for (int x = 0; x < mapsize.x; x++)
-        {
-            for (int y = 0; y < mapsize.y; y++)
-            {
-                allTileCoords.Add(new Coord(x, y));
-                OpenCoord.Add(new Coord(x, y));
-            }
-        }
-
-        ShuffledArray = new Queue<Coord>(ShuffleArray(allTileCoords.ToArray(), seed));
-        mapCentre = new Coord((int)mapsize.x / 2, (int)mapsize.y / 2);
-
-        for (int i = 0; i < obstacleCount; i++)
-        {
-            Coord random = RandomCoord();
-            obstacleMap[random.x, random.y] = true;
-            currentObstacleCount++;
-
-            if (random != mapCentre && MapIsFullyAccessible(obstacleMap, currentObstacleCount, mapsize))
-            {
-                Vector3 obstaclePos =
-                    new Vector3(-mapsize.x / 2f + .5f + random.x, 0,
-                    -mapsize.y / 2f + .5f + random.y) * tileSize;
-
-                float obstacleHeight = Mathf.Lerp(1, 3, (float)prng.NextDouble());
-
-                GameObject NewObstacle =
-                    Instantiate(obstacle, obstaclePos + Vector3.up * obstacleHeight / 2, Quaternion.identity);
-
-                NewObstacle.transform.localScale =
-                    new Vector3(scaleValue.x, obstacleHeight, scaleValue.z);
-
-                NewObstacle.transform.parent = mapHolder;
-
-                Renderer obstacleRenderer = NewObstacle.GetComponent<Renderer>();
-                Material obstacleMaterial = new Material(obstacleRenderer.sharedMaterial);
-                float colorPercent = random.y / (float)mapsize.y;
-                obstacleMaterial.color = Color.Lerp(foregroundColor, backgroundColor, colorPercent);
-                obstacleRenderer.sharedMaterial = obstacleMaterial;
-
-                OpenCoord.Remove(random);
-                RandomPos();
-            }
-            else
-            {
-                obstacleMap[random.x, random.y] = false;
-                currentObstacleCount--;
-            }
-        }
-
         Transform obstacleHolder = new GameObject("obstacle holder").transform;
         obstacleHolder.parent = mapHolder;
 
@@ -258,45 +193,21 @@ public class grid : MonoBehaviour
         if (cam != null) cam.LookAt = obstacleHolder;
     }
 
-    bool MapIsFullyAccessible(bool[,] obstacleMap, int currentObstacleCount, Vector2 mapsize)
+    public GameObject getTileAtPosition(Vector3 position)
     {
-        bool[,] mapFlags = new bool[obstacleMap.GetLength(0), obstacleMap.GetLength(1)];
-        Queue<Coord> queue = new Queue<Coord>();
-        queue.Enqueue(mapCentre);
-        mapFlags[mapCentre.x, mapCentre.y] = true;
+        float distance = 99999;
+        GameObject tile = null;
 
-        int accessibleTileCount = 1;
-
-        while (queue.Count > 0)
+        foreach(GameObject _tile in positions)
         {
-            Coord tile = queue.Dequeue();
-
-            for (int x = -1; x <= 1; x++)
+            if(Vector3.Distance(_tile.transform.position, position) < distance)
             {
-                for (int y = -1; y <= 1; y++)
-                {
-                    int neighbourX = tile.x + x;
-                    int neighbourY = tile.y + y;
-
-                    if (x == 0 || y == 0)
-                    {
-                        if (neighbourX >= 0 && neighbourX < obstacleMap.GetLength(0)
-                            && neighbourY >= 0 && neighbourY < obstacleMap.GetLength(1))
-                        {
-                            if (!mapFlags[neighbourX, neighbourY] && !obstacleMap[neighbourX, neighbourY])
-                            {
-                                mapFlags[neighbourX, neighbourY] = true;
-                                queue.Enqueue(new Coord(neighbourX, neighbourY));
-                                accessibleTileCount++;
-                            }
-                        }
-                    }
-                }
+                distance = Vector3.Distance(_tile.transform.position, position);
+                tile = _tile;
             }
         }
 
-        int targetAccessibleTileCount = (int)(mapsize.x * mapsize.y - currentObstacleCount);
-        return targetAccessibleTileCount == accessibleTileCount;
+        return tile;
     }
 
     public GameObject getRandomPos()
@@ -339,48 +250,5 @@ public class grid : MonoBehaviour
         }
 
         return array;
-    }
-
-    Coord RandomCoord()
-    {
-        Coord c = ShuffledArray.Dequeue();
-        ShuffledArray.Enqueue(c);
-        return c;
-    }
-
-    void RandomPos() { }
-
-    public struct Coord
-    {
-        public int x;
-        public int y;
-
-        public Coord(int _x, int _y)
-        {
-            x = _x;
-            y = _y;
-        }
-
-        public static bool operator ==(Coord c1, Coord c2)
-        {
-            return c1.x == c2.x && c1.y == c2.y;
-        }
-
-        public static bool operator !=(Coord c1, Coord c2)
-        {
-            return !(c1 == c2);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (!(obj is Coord)) return false;
-            Coord other = (Coord)obj;
-            return x == other.x && y == other.y;
-        }
-
-        public override int GetHashCode()
-        {
-            return (x * 397) ^ y;
-        }
     }
 }
