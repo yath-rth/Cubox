@@ -38,8 +38,12 @@ public class HealthBar : MonoBehaviour
             if (i < num && i > -1) healthBars[i].SetActive(true);
         }
 
+        if(healthBars.Length <= 0) return; 
+
         for (int i = 0; i < healthBars.Length; i++)
         {
+            if(healthBars[i] == null) continue;
+
             Renderer render = healthBars[i].GetComponent<Renderer>();
             Material obstacleMaterial = new Material(render.sharedMaterial);
             colourPercent = (5 - count) / num;

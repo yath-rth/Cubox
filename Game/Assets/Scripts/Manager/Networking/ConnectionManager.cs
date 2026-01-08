@@ -167,13 +167,13 @@ public class ConnectionManager : MonoBehaviour
         {
             foreach (string id in players.Keys)
             {
-                if(!players.ContainsKey(id)) continue;
+                if(!players.ContainsKey(id) || !msg.players.ContainsKey(id)) continue;
 
                 if (id != playerId) players[id].UpdateTransforms(msg.players[id], true);
                 else players[id].UpdateTransforms(msg.players[id], false);
             }
 
-            bulletMan.updateBullets(msg);
+            bulletMan.updateBullets(msg, players);
             enemySpawn.updateEnemies(msg);
         }
 
@@ -184,6 +184,7 @@ public class ConnectionManager : MonoBehaviour
             {
                 if (!msg.players.ContainsKey(id))
                 {
+                    Destroy(players[id]);
                     players.Remove(id);
                 }
             }

@@ -75,6 +75,8 @@ public class grid : MonoBehaviour
         maxSizeX = mapSize["MaxX"];
         maxSizeY = mapSize["MaxY"];
 
+        Maxmapsize = new Vector2(maxSizeX, maxSizeY);
+
         positions = new List<GameObject>((int)(mapsize.x * mapsize.y));
         tileScripts = new List<Tile>((int)(mapsize.x * mapsize.y));
 

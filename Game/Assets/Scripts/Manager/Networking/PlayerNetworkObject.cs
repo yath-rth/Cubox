@@ -4,13 +4,16 @@ using UnityEngine;
 
 class PlayerNetworkObject : MonoBehaviour
 {
-    public string id;
+    string id;
     [SerializeField] MeshRenderer graphics;
     Color color;
+    Gun gun;
 
     public void SetUp(ServerMessage msg, string id)
     {
         this.id = id;
+        gun = GetComponent<Gun>();
+
         if (msg.players != null)
         {
             MaterialPropertyBlock mat = new MaterialPropertyBlock();
@@ -28,12 +31,18 @@ class PlayerNetworkObject : MonoBehaviour
     public void UpdateTransforms(PlayerDTO _transform, bool both)
     {
         transform.DOMove(_transform.position, 0.1f);
-        if(both) transform.DORotate(_transform.rotation, 0.3f);
+        if (both) transform.DORotate(_transform.rotation, 0.3f);
 
         DamageableItem item = GetComponent<DamageableItem>();
         if (item != null)
         {
             item.UpdateHealth(_transform.health, color);
         }
+    }
+
+    public void Shoot()
+    {
+        if(gun == null) return;
+        StartCoroutine(gun.Shoot());
     }
 }

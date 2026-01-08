@@ -87,30 +87,6 @@ public class Gun : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        //if (player != null) if (!player) return;
-
-        if (isReloading) return;
-
-        if (currAmmo <= 0)
-        {
-            StartCoroutine(reloading());
-            return;
-        }
-
-        if ((input > 0) && canFire <= Time.time)
-        {
-            if (activeGun.getStat(StatTypes.attackCooldown) > 0) canFire = Time.time + (1 / (activeGun.getStat(StatTypes.attackCooldown) / 60f));
-            else canFire = Time.time;
-
-            StartCoroutine(Shoot());
-        }
-
-        if (player != null) player.playerStats.setStat(StatTypes.damage, activeGun.getStat(StatTypes.damage));
-
-    }
-
     public void muzzleUnlock(int muzzleCount)
     {
         int num = muzzle.Count;
@@ -134,22 +110,16 @@ public class Gun : MonoBehaviour
         }
     }
 
-    IEnumerator Shoot()
+    public IEnumerator Shoot()
     {
         if (pool != null)
         {
-            if (!activeGun.infiniteAmmo) currAmmo--;
-
             for (int i = 0; i < muzzle.Count; i++)
             {
                 if (muzzle[i].gameObject.activeInHierarchy)
                 {
-                    GameObject bullet = pool.GetObject(1);
-                    bullet.transform.SetPositionAndRotation(muzzle[i].position, muzzle[i].rotation);
-                    bullet.GetComponent<Rigidbody>().AddForce(muzzle[i].forward * activeGun.bulletSpeed, ForceMode.Impulse);
                     muzzleFlash[i].Play();
                     flashLight[i].SetActive(true);
-                    StartCoroutine(bullet.GetComponent<bullet>().Initialise(activeGun.range));
                 }
             }
 

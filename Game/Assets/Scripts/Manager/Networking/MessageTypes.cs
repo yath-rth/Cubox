@@ -65,12 +65,14 @@ public class BulletDTO
     public Vector3 position;
     public Vector3 direction;
     public float lifetime;
+    public string owner;
 }
 
 public class EnemyDTO
 {
     public Vector3 position;
     public Vector3 direction;
+    public int health;
 }
 
 public class RotationDTO

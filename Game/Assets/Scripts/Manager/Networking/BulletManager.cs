@@ -8,7 +8,7 @@ class BulletManager : MonoBehaviour
 {
     Dictionary<string, GameObject> bullets = new Dictionary<string, GameObject>();
 
-    public void updateBullets(ServerMessage msg)
+    public void updateBullets(ServerMessage msg, Dictionary<string, PlayerNetworkObject> players)
     {
         if (msg.bullets == null) return;
 
@@ -20,10 +20,12 @@ class BulletManager : MonoBehaviour
             {
                 GameObject bullet = ObjectPooler.instance.GetObject(1);
                 bullets[id] = bullet;
-
-                DOTween.Kill(bullets[id].transform);
-
                 bullet.transform.rotation = Quaternion.LookRotation(msg.bullets[id].direction);
+
+                if(players[msg.bullets[id].owner] != null)
+                {
+                    players[msg.bullets[id].owner].Shoot();
+                }
             }
 
             bullets[id].transform.position = msg.bullets[id].position;

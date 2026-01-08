@@ -14,7 +14,7 @@ public class DamageableItem : MonoBehaviour
         if (this.health > health) StartCoroutine(TakeDamage(health, color));
         this.health = health;
         CheckObjectHealth();
-        if(healthBar != null) if(healthBar.isActiveAndEnabled) healthBar.UpdateHealthBar(this.health);
+        if (healthBar != null) if (healthBar.isActiveAndEnabled) healthBar.UpdateHealthBar(this.health);
     }
 
     public bool GetAlive()
@@ -51,10 +51,9 @@ public class DamageableItem : MonoBehaviour
         }
         else if (health <= 0)
         {
-            Debug.Log("U have died");
             Alive = false;
-            graphics.gameObject.SetActive(false);
-            deathEffect.SetActive(true);
+            GameObject obj = Instantiate(deathEffect, transform.position + new Vector3(0, 2f, 0), Quaternion.Euler(0, -transform.rotation.y, 0), null);
+            StartCoroutine(obj.GetComponent<DeathEffect>().cleanUp());
         }
 
 
@@ -70,5 +69,10 @@ public class DamageableItem : MonoBehaviour
         //         playerStats.setStat(StatTypes.hitpoints, playerStats.getStat(StatTypes.hitpoints) + temp);
         //     }
         // }
+    }
+
+    void cleanEffect(GameObject obj)
+    {
+        DestroyImmediate(obj);
     }
 }

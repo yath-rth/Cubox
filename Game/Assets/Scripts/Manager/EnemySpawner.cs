@@ -8,65 +8,16 @@ using System.Linq;
 
 public class EnemySpawner : MonoBehaviour
 {
-    Player player;
     ObjectPooler pool;
     grid Grid;
-    int enemiesKilled = 0;
-    int enemiesCount = 0;
-    int wave = 1;
-    int richEnemy = 0;
-
-    public int maxEnemy = 10;
-    public float spawnTime = 2;
-    public float spawnTimeDecrease = .2f;
-    public float enemySpeed;
-    public int waveSpeed = 25;
-    public List<WeightedVal> enemyTypes;
-    public Color flashColour = Color.red;
-    Color initialColour;
-
-    private float nextCampCheckTime;
-    bool isCamping;
-    public float timeBetweenCampingChecks;
-    private Vector3 campPositionOld;
-    public float campThresholdDistance;
-
+    private float spawnTime = 2f;
+    [SerializeField] Color enemyColor;
     Dictionary<string, GameObject> enemies = new Dictionary<string, GameObject>();
 
     private void Start()
     {
-        player = Player.playerInstance;
         pool = ObjectPooler.instance;
         Grid = GetComponent<grid>();
-
-        //StartCoroutine(Wave());
-    }
-
-    private void OnEnable()
-    {
-        Enemy.OnDeath += enemyKilled;
-    }
-
-    private void OnDisable()
-    {
-        Enemy.OnDeath -= enemyKilled;
-    }
-
-    void enemyKilled(int i, bool a)
-    {
-        if (a)
-        {
-            if (i == 3)
-            {
-                richEnemy--;
-            }
-            enemiesKilled++;
-            enemiesCount--;
-        }
-        else
-        {
-            enemiesCount--;
-        }
     }
 
     public void updateEnemies(ServerMessage msg)
@@ -80,11 +31,17 @@ public class EnemySpawner : MonoBehaviour
                 StartCoroutine(SpawnEnemy(msg, id));
             }
 
-            if(enemies[id] == null) continue;
+            if (enemies[id] == null) continue;
 
             //enemies[id].transform.position = msg.enemies[id].position;
             enemies[id].transform.DOMove(msg.enemies[id].position, 0.2f);
             enemies[id].transform.LookAt(msg.enemies[id].direction);
+
+            DamageableItem healthUnit = enemies[id].GetComponent<DamageableItem>();
+            if(healthUnit != null)
+            {
+                healthUnit.UpdateHealth(msg.enemies[id].health, enemyColor);
+            }
         }
 
         foreach (string id in enemies.Keys.ToList())
@@ -141,23 +98,25 @@ public class EnemySpawner : MonoBehaviour
     {
         float spawnTimer = 0;
         GameObject newTile = Grid.getTileAtPosition(msg.enemies[id].position);
-        
+
         enemies[id] = null;
 
-        if (newTile != null)
-        {
-            Material newTileMat = newTile.GetComponent<Renderer>().material;
+        // if (newTile != null)
+        // {
+        //     Material newTileMat = newTile.GetComponent<Renderer>().material;
 
-            while (spawnTimer < spawnTime / 3)
-            {
-                newTileMat.SetFloat("Amt_Of_Outline", Mathf.PingPong(spawnTimer, 2));
+        //     while (spawnTimer < spawnTime / 3)
+        //     {
+        //         newTileMat.SetFloat("Amt_Of_Outline", Mathf.PingPong(spawnTimer, 2));
 
-                spawnTimer += Time.deltaTime;
-                yield return null;
-            }
+        //         spawnTimer += Time.deltaTime;
+        //         yield return null;
+        //     }
 
-            newTileMat.SetFloat("Amt_Of_Outline", 2);
-        }
+        //     newTileMat.SetFloat("Amt_Of_Outline", 2);
+        // }
+
+        yield return null;
 
         GameObject enemy = pool.GetObject(2);
         enemy.transform.position = msg.enemies[id].position;
