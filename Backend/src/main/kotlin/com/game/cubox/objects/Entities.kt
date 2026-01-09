@@ -11,7 +11,10 @@ data class PlayerEntity (
     var inputState: Int,
     var shootInput: Int,
     var color: String,
-    var health: Int
+    var health: Int,
+    var fireRate: Float,
+    var lastShootTIme: Float,
+    var timer: Float
 )
 
 @Serializable
@@ -19,5 +22,15 @@ data class Bullet(
     var position: Vector3,
     var direction: Vector3,
     var owner: String,
-    var lifetime: Float
+    var lifetime: Float,
+    var damage: Int
+)
+
+@Serializable
+data class Enemy(
+    var position: Vector3,
+    var direction: Vector3,
+    var damage: Int,
+    var targetId: String,
+    var health: Int
 )

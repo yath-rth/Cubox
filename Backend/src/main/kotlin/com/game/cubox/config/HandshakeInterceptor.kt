@@ -1,4 +1,4 @@
-package com.game.cubox
+package com.game.cubox.config
 
 import org.springframework.http.server.ServerHttpRequest
 import org.springframework.http.server.ServerHttpResponse
@@ -9,7 +9,7 @@ import java.lang.Exception
 
 
 @Component
-class handshakeInterceptor: HttpSessionHandshakeInterceptor() {
+class HandshakeInterceptor: HttpSessionHandshakeInterceptor() {
 
     override fun beforeHandshake(
         request: ServerHttpRequest,
