@@ -157,7 +157,7 @@ public class grid : MonoBehaviour
         mapBlockers.Add(maskTop);
         mapBlockers.Add(maskBottom);
 
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 4; i++)
         {
             Transform obj = Instantiate(camPos, mapBlockers[i].position * camOffset, Quaternion.identity).transform;
             CinemachineTargetGroup.Target target = newTarget(obj);

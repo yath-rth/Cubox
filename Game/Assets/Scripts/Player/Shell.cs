@@ -16,9 +16,9 @@ public class Shell : MonoBehaviour
         pool = ObjectPooler.instance;
     }
 
-    public void Spawned(){
+    public void Spawned(Transform player){
         float force = Random.Range(forceMin, forceMax);
-        rb.AddForce(transform.right * force);
+        rb.AddForce(player.transform.right * force);
         rb.AddTorque(Random.insideUnitSphere * force);
 
         StartCoroutine(Fade());

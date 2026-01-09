@@ -16,6 +16,7 @@ public class Player : MonoBehaviour
     Quaternion lookDir;
     Transform cube;
     DamageableItem item;
+    Camera cam;
 
     public PlayerInput newInput;
 
@@ -62,6 +63,7 @@ public class Player : MonoBehaviour
         gun = GetComponent<Gun>();
         newInput = new PlayerInput();
         cube = crossHairVisual.transform.parent.transform;
+        cam = Camera.main;
         defaultPos = new Vector3(crossHairVisual.localPosition.x, crossHairVisual.localPosition.y, crosshairOffset);
 
         playerStats.setStat(StatTypes.hitpoints, playerStats.getStat(StatTypes.maxhitpoints));
@@ -74,7 +76,6 @@ public class Player : MonoBehaviour
 
             newInput.WSAD.Shoot.performed += _ => startShoot();
             newInput.WSAD.Shoot.canceled += _ => endShoot();
-
         }
     }
 
@@ -191,11 +192,13 @@ public class Player : MonoBehaviour
 
     void rotate()
     {
+        if(cam == null) return;
+
         float point;
 
         Vector3 mouse = new Vector3(look.x, look.y, 0);
 
-        Ray ray = Camera.main.ScreenPointToRay(mouse);
+        Ray ray = cam.ScreenPointToRay(mouse);
 
         Plane groundPlane = new Plane(Vector3.up, Vector3.up);
 

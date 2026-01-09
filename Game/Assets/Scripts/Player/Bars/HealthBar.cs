@@ -38,6 +38,7 @@ public class HealthBar : MonoBehaviour
             if (i < num && i > -1) healthBars[i].SetActive(true);
         }
 
+        if(healthBars == null) return;
         if(healthBars.Length <= 0) return; 
 
         for (int i = 0; i < healthBars.Length; i++)

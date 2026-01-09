@@ -124,7 +124,7 @@ public class Gun : MonoBehaviour
             }
 
             GameObject shell = pool.GetObject(3);
-            shell.GetComponent<Shell>().Spawned();
+            shell.GetComponent<Shell>().Spawned(transform);
             shell.transform.SetPositionAndRotation(shellSpawn.position, shellSpawn.rotation);
 
             audioSource.PlayOneShot(activeGun.audioClip);
