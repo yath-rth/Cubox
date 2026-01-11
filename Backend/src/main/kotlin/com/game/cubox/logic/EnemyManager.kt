@@ -24,7 +24,7 @@ class EnemyManager(
 
     //Variables to spawn
     private var timer = 0f
-    private val timeBTWspawn = 5f
+    private val timeBTWspawn = 1f
     private var lastSpawnTime = 0f
 
     fun getEnemies() = enemies
