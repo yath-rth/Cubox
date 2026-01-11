@@ -1,4 +1,5 @@
 using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 
 public class DamageableItem : MonoBehaviour
@@ -9,9 +10,9 @@ public class DamageableItem : MonoBehaviour
     [SerializeField] HealthBar healthBar;
     [SerializeField] bool Alive;
 
-    public void UpdateHealth(int health, Color color)
+    public void UpdateHealth(int health, Color color, Color flashColor)
     {
-        if (this.health > health) StartCoroutine(TakeDamage(health, color));
+        if (this.health > health) StartCoroutine(TakeDamage(health, color, flashColor));
         this.health = health;
         CheckObjectHealth();
         if (healthBar != null) if (healthBar.isActiveAndEnabled) healthBar.UpdateHealthBar(this.health);
@@ -22,15 +23,17 @@ public class DamageableItem : MonoBehaviour
         return Alive;
     }
 
-    IEnumerator TakeDamage(int health, Color color)
+    IEnumerator TakeDamage(int health, Color color, Color flashColor)
     {
         float damageTimer = 0;
         MaterialPropertyBlock mat = new MaterialPropertyBlock();
-        graphics.GetPropertyBlock(mat); ;
+        graphics.GetPropertyBlock(mat);
 
-        while (damageTimer < .25f)
+        transform.DOPunchPosition(-transform.forward, 0.2f, 0, 1f, false);
+
+        while (damageTimer < .35f)
         {
-            mat.SetColor("_color", Color.Lerp(color, Color.red, Mathf.PingPong(damageTimer * 2f, 1)));
+            mat.SetColor("_color", Color.Lerp(color, flashColor, Mathf.PingPong(damageTimer * 2f, 1)));
             damageTimer += Time.deltaTime;
             graphics.SetPropertyBlock(mat);
 

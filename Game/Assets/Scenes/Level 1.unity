@@ -7195,6 +7195,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyColor: {r: 0.28235295, g: 0.83137256, b: 0.24705882, a: 1}
+  flashColor: {r: 0.83137256, g: 0.24705882, b: 0.2509804, a: 1}
 --- !u!114 &443097806
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7251,7 +7252,7 @@ MonoBehaviour:
   maxSizeY: 17
   minSizeX: 12
   minSizeY: 10
-  outlinePercent: 2
+  outlinePercent: 1.98
   tileHeight: 1
   camOffset: 1.38
   tileSize: 2.09

@@ -36,7 +36,7 @@ class PlayerNetworkObject : MonoBehaviour
         DamageableItem item = GetComponent<DamageableItem>();
         if (item != null)
         {
-            item.UpdateHealth(_transform.health, color);
+            item.UpdateHealth(_transform.health, color, Color.red);
         }
     }
 

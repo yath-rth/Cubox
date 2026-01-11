@@ -12,6 +12,7 @@ public class EnemySpawner : MonoBehaviour
     grid Grid;
     private float spawnTime = 2f;
     [SerializeField] Color enemyColor;
+    [SerializeField] Color flashColor;
     Dictionary<string, GameObject> enemies = new Dictionary<string, GameObject>();
 
     private void Start()
@@ -38,9 +39,9 @@ public class EnemySpawner : MonoBehaviour
             enemies[id].transform.LookAt(msg.enemies[id].direction);
 
             DamageableItem healthUnit = enemies[id].GetComponent<DamageableItem>();
-            if(healthUnit != null)
+            if (healthUnit != null)
             {
-                healthUnit.UpdateHealth(msg.enemies[id].health, enemyColor);
+                healthUnit.UpdateHealth(msg.enemies[id].health, enemyColor, flashColor);
             }
         }
 
@@ -100,28 +101,25 @@ public class EnemySpawner : MonoBehaviour
         GameObject newTile = Grid.getTileAtPosition(msg.enemies[id].position);
 
         enemies[id] = null;
-
-        // if (newTile != null)
-        // {
-        //     Material newTileMat = newTile.GetComponent<Renderer>().material;
-
-        //     while (spawnTimer < spawnTime / 3)
-        //     {
-        //         newTileMat.SetFloat("Amt_Of_Outline", Mathf.PingPong(spawnTimer, 2));
-
-        //         spawnTimer += Time.deltaTime;
-        //         yield return null;
-        //     }
-
-        //     newTileMat.SetFloat("Amt_Of_Outline", 2);
-        // }
-
-        yield return null;
-
         GameObject enemy = pool.GetObject(2);
         enemy.transform.position = msg.enemies[id].position;
         enemy.transform.LookAt(msg.enemies[id].direction);
         enemies[id] = enemy;
+
+        if (newTile != null)
+        {
+            Material newTileMat = newTile.GetComponent<Renderer>().material;
+
+            while (spawnTimer < spawnTime / 3)
+            {
+                newTileMat.SetFloat("Amt_Of_Outline", Mathf.PingPong(spawnTimer, 2));
+
+                spawnTimer += Time.deltaTime;
+                yield return null;
+            }
+
+            newTileMat.SetFloat("Amt_Of_Outline", 2);
+        }
     }
 }
 
