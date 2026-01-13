@@ -23,7 +23,8 @@ data class PlayerDTO(
     var position: Vector3,
     var rotation: Vector3,
     var color: String,
-    var health: Int
+    var health: Int,
+    var isReloading: Int
 )
 
 @Serializable
@@ -36,6 +37,7 @@ data class BulletDTO(
 
 @Serializable
 data class EnemyDTO(
+    var state: EnemyState,
     var position: Vector3,
     var direction: Vector3,
     var health: Int

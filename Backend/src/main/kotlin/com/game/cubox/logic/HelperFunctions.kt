@@ -46,6 +46,7 @@ class HelperFunctions {
         }
 
         fun safeSend(session: WebSocketSession, msg: String) {
+            //println("Sending this message $msg")
             synchronized(session) {
                 session.sendMessage(TextMessage(msg))
             }

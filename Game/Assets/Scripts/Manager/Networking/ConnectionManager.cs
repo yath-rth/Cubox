@@ -74,9 +74,9 @@ public class ConnectionManager : MonoBehaviour
 
     public async void SendShootInput(InputType type, int shootInput)
     {
-        if(!hasPlayerId) return;
+        if (!hasPlayerId) return;
 
-        if(ws.State == WebSocketState.Open)
+        if (ws.State == WebSocketState.Open)
         {
             ClientMessage cm = new ClientMessage(playerId, type, shootInput, Player.playerInstance.transform.eulerAngles);
             await ws.SendText(JsonConvert.SerializeObject(cm, Formatting.None, new JsonSerializerSettings()
@@ -167,7 +167,7 @@ public class ConnectionManager : MonoBehaviour
         {
             foreach (string id in players.Keys)
             {
-                if(!players.ContainsKey(id) || !msg.players.ContainsKey(id)) continue;
+                if (!players.ContainsKey(id) || !msg.players.ContainsKey(id)) continue;
 
                 if (id != playerId) players[id].UpdateTransforms(msg.players[id], true);
                 else players[id].UpdateTransforms(msg.players[id], false);
@@ -177,15 +177,16 @@ public class ConnectionManager : MonoBehaviour
             enemySpawn.updateEnemies(msg);
         }
 
-        if(msg.type == ServerMessageType.PLAYER_EXIT)
+        if (msg.type == ServerMessageType.PLAYER_EXIT)
         {
-            if(msg.players == null) return;
-            foreach(string id in players.Keys.ToList())
+            if (msg.players == null) return;
+            foreach (string id in players.Keys.ToList())
             {
                 if (!msg.players.ContainsKey(id))
                 {
-                    Destroy(players[id]);
+                    PlayerNetworkObject obj = players[id];
                     players.Remove(id);
+                    DestroyImmediate(obj.gameObject);
                 }
             }
         }

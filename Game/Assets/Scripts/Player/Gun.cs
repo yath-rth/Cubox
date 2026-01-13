@@ -129,16 +129,17 @@ public class Gun : MonoBehaviour
 
             audioSource.PlayOneShot(activeGun.audioClip);
 
-            yield return new WaitForSeconds(.2f);
+            yield return new WaitForSeconds(.4f);
 
             foreach (GameObject item in flashLight) item.SetActive(false);
         }
     }
 
-    IEnumerator reloading()
+    public IEnumerator Reload()
     {
         Debug.Log("Reloading");
         isReloading = true;
+        foreach (GameObject item in flashLight) item.SetActive(false);
 
         gunParent.transform.DORewind();
         gunParent.transform.DOPunchRotation(reloadRotation, activeGun.reloadTime - .1f, 0, 1);

@@ -7194,8 +7194,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30f6cb6e32226414ca12f08b629349b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyColor: {r: 0.28235295, g: 0.83137256, b: 0.24705882, a: 1}
-  flashColor: {r: 0.83137256, g: 0.24705882, b: 0.2509804, a: 1}
+  spawnTime: 4
 --- !u!114 &443097806
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7665,9 +7664,10 @@ GameObject:
   - component: {fileID: 471856337}
   - component: {fileID: 471856335}
   - component: {fileID: 471856334}
+  - component: {fileID: 471856338}
   m_Layer: 4
   m_Name: Render Texture Cam
-  m_TagString: Untagged
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7680,7 +7680,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 471856332}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.00000004483026, y: -2.7281864e-15, z: -3.1136362e-15, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -7807,7 +7807,7 @@ Camera:
     serializedVersion: 2
     m_Bits: 0
   m_RenderingPath: -1
-  m_TargetTexture: {fileID: 8400000, guid: 5fd38a6cf0a06a045bacc8bc24af3198, type: 2}
+  m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
   m_HDR: 1
@@ -7817,6 +7817,14 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!81 &471856338
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 471856332}
+  m_Enabled: 1
 --- !u!1001 &475093603
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8394,7 +8402,6 @@ GameObject:
   m_Component:
   - component: {fileID: 517087434}
   - component: {fileID: 517087438}
-  - component: {fileID: 517087437}
   - component: {fileID: 517087436}
   - component: {fileID: 517087435}
   m_Layer: 4
@@ -8403,7 +8410,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &517087434
 Transform:
   m_ObjectHideFlags: 0
@@ -8498,14 +8505,6 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
---- !u!81 &517087437
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 517087433}
-  m_Enabled: 1
 --- !u!20 &517087438
 Camera:
   m_ObjectHideFlags: 0
@@ -10081,7 +10080,7 @@ Camera:
   m_GameObject: {fileID: 706943872}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
+  m_ClearFlags: 4
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
@@ -16891,12 +16890,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Priority:
-    Enabled: 0
-    m_Value: 0
+    Enabled: 1
+    m_Value: 10
   OutputChannel: 1
   StandbyUpdate: 2
-  m_StreamingVersion: 20170927
-  m_LegacyPriority: 10
+  m_StreamingVersion: 20241001
+  m_LegacyPriority: 0
   m_LookAt: {fileID: 0}
   m_Follow: {fileID: 4060016912308130637}
   m_Lens:
@@ -22615,12 +22614,12 @@ GameObject:
   - component: {fileID: 1131201714}
   - component: {fileID: 1131201713}
   m_Layer: 0
-  m_Name: Blur
+  m_Name: Post Processing
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1131201713
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22647,7 +22646,7 @@ Transform:
   m_GameObject: {fileID: 1131201712}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.100001, y: 11.865606, z: 35.20967}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -23357,7 +23356,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -23717,7 +23716,7 @@ Camera:
     serializedVersion: 2
     m_Bits: 16352
   m_RenderingPath: -1
-  m_TargetTexture: {fileID: 8400000, guid: 5fd38a6cf0a06a045bacc8bc24af3198, type: 2}
+  m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
   m_HDR: 1

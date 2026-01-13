@@ -5,6 +5,7 @@ import org.springframework.web.socket.WebSocketSession
 
 @Serializable
 data class PlayerEntity (
+    var state: PlayerState,
     var session: WebSocketSession,
     var position: Vector3,
     var rotation: Vector3,
@@ -14,7 +15,10 @@ data class PlayerEntity (
     var health: Int,
     var fireRate: Float,
     var lastShootTIme: Float,
-    var timer: Float
+    var timer: Float,
+    var ammo: Int,
+    var isReloading: Int,
+    var lastReloadTIme: Float
 )
 
 @Serializable
@@ -28,6 +32,7 @@ data class Bullet(
 
 @Serializable
 data class Enemy(
+    var enemyState: EnemyState,
     var position: Vector3,
     var direction: Vector3,
     var damage: Int,

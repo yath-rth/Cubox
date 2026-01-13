@@ -10,9 +10,7 @@ public class EnemySpawner : MonoBehaviour
 {
     ObjectPooler pool;
     grid Grid;
-    private float spawnTime = 2f;
-    [SerializeField] Color enemyColor;
-    [SerializeField] Color flashColor;
+    [SerializeField] private float spawnTime = 4f;
     Dictionary<string, GameObject> enemies = new Dictionary<string, GameObject>();
 
     private void Start()
@@ -41,7 +39,7 @@ public class EnemySpawner : MonoBehaviour
             DamageableItem healthUnit = enemies[id].GetComponent<DamageableItem>();
             if (healthUnit != null)
             {
-                healthUnit.UpdateHealth(msg.enemies[id].health, enemyColor, flashColor);
+                healthUnit.UpdateHealth(msg.enemies[id].health);
             }
         }
 

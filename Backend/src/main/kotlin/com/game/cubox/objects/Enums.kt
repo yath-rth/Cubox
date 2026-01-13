@@ -13,3 +13,16 @@ enum class InputType {
     MOVE,
     SHOOT
 }
+
+enum class EnemyState{
+    NONE,
+    CHASING,
+    ATTACK,
+    DEAD
+}
+
+enum class PlayerState{
+    NONE,
+    MOVING,
+    SHOOTING
+}

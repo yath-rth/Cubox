@@ -10,9 +10,9 @@ public class DamageableItem : MonoBehaviour
     [SerializeField] HealthBar healthBar;
     [SerializeField] bool Alive;
 
-    public void UpdateHealth(int health, Color color, Color flashColor)
+    public void UpdateHealth(int health)
     {
-        if (this.health > health) StartCoroutine(TakeDamage(health, color, flashColor));
+        if (this.health > health) StartCoroutine(TakeDamage(health));
         this.health = health;
         CheckObjectHealth();
         if (healthBar != null) if (healthBar.isActiveAndEnabled) healthBar.UpdateHealthBar(this.health);
@@ -23,24 +23,24 @@ public class DamageableItem : MonoBehaviour
         return Alive;
     }
 
-    IEnumerator TakeDamage(int health, Color color, Color flashColor)
+    IEnumerator TakeDamage(int health)
     {
-        float damageTimer = 0;
+        float damageTimer = 0f;
         MaterialPropertyBlock mat = new MaterialPropertyBlock();
         graphics.GetPropertyBlock(mat);
 
-        transform.DOPunchPosition(-transform.forward, 0.2f, 0, 1f, false);
+        transform.DOPunchPosition(-transform.forward * 1.5f, 0.2f, 0, 1f, false);
 
-        while (damageTimer < .35f)
+        while (damageTimer < .34f)
         {
-            mat.SetColor("_color", Color.Lerp(color, flashColor, Mathf.PingPong(damageTimer * 2f, 1)));
+            mat.SetFloat("Amt_Of_Outline", 1 - Mathf.PingPong(damageTimer * 4, 1) * 3);
             damageTimer += Time.deltaTime;
             graphics.SetPropertyBlock(mat);
 
             yield return null;
         }
 
-        mat.SetColor("_color", color);
+        mat.SetFloat("Amt_Of_Outline", 2);
         graphics.SetPropertyBlock(mat);
 
         this.health = health;

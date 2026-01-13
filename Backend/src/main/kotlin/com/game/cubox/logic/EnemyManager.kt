@@ -1,6 +1,7 @@
 package com.game.cubox.logic
 
 import com.game.cubox.objects.Enemy
+import com.game.cubox.objects.EnemyState
 import com.game.cubox.objects.Vector3
 import lombok.experimental.Helper
 import org.springframework.stereotype.Component
@@ -19,7 +20,7 @@ class EnemyManager(
     private val grid = mutableMapOf<Cell, MutableList<Enemy>>()
 
     //Enemy Movement Variables
-    private val enemySpeed = 0.1f
+    private val enemySpeed = 0.08f
     val enemySize = 0.75f
 
     //Variables to spawn
@@ -53,7 +54,9 @@ class EnemyManager(
                 ?: playerManager.getPlayer(playerManager.getClosestPlayer(enemy.position))) ?: continue
 
             enemy.direction = player.position - enemy.position
-            if(HelperFunctions.distance(player.position, enemy.position) > (enemySize + playerManager.PLAYERSIZE + 0.1f)) enemy.position += enemy.direction * enemySpeed
+            if(HelperFunctions.distance(player.position, enemy.position) > (enemySize + playerManager.PLAYERSIZE + 0.1f)) {
+                enemy.position += enemy.direction * enemySpeed
+            }
 
             if (enemy.health <= 0) {
                 deadEnemies.add(id)
@@ -119,7 +122,7 @@ class EnemyManager(
         val playerID = playerManager.getClosestPlayer(spawnPosition) ?: return
         val player = playerManager.getPlayer(playerID) ?: return
 
-        val enemy = Enemy(spawnPosition, player.position - spawnPosition, 5, playerID, 30)
+        val enemy = Enemy(EnemyState.NONE, spawnPosition, player.position - spawnPosition, 5, playerID, 30)
         enemies[UUID.randomUUID().toString().slice(0..5)] = enemy
     }
 }

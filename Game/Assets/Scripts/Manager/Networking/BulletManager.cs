@@ -11,22 +11,33 @@ class BulletManager : MonoBehaviour
     public void updateBullets(ServerMessage msg, Dictionary<string, PlayerNetworkObject> players)
     {
         if (msg.bullets == null) return;
+        if (msg.players == null) return;
 
         foreach (string id in msg.bullets.Keys)
         {
             if (bullets == null) continue;
+            //if (!msg.players.ContainsKey(msg.bullets[id].owner)) continue;
 
-            if (!bullets.ContainsKey(id) && ObjectPooler.instance != null)
+            if (msg.players[msg.bullets[id].owner].isReloading == 1)
             {
-                GameObject bullet = ObjectPooler.instance.GetObject(1);
-                bullets[id] = bullet;
-                bullet.transform.rotation = Quaternion.LookRotation(msg.bullets[id].direction);
-
-                if(players[msg.bullets[id].owner] != null)
+                players[msg.bullets[id].owner].Reload();
+            }
+            else
+            {
+                if (!bullets.ContainsKey(id) && ObjectPooler.instance != null)
                 {
-                    players[msg.bullets[id].owner].Shoot();
+                    GameObject bullet = ObjectPooler.instance.GetObject(1);
+                    bullets[id] = bullet;
+                    bullet.transform.rotation = Quaternion.LookRotation(msg.bullets[id].direction);
+
+                    if (players[msg.bullets[id].owner] != null)
+                    {
+                        players[msg.bullets[id].owner].Shoot();
+                    }
                 }
             }
+
+            if(!bullets.ContainsKey(id)) continue;
 
             bullets[id].transform.position = msg.bullets[id].position;
             bullets[id].transform.DOMove(msg.bullets[id].position, 0.2f);

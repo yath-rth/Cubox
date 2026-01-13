@@ -38,7 +38,7 @@ class MyTextHandler(
             id = id,
             mapSize = worldManager.getMap(),
             players = playerManager.getPlayers().toMap()
-                .mapValues { PlayerDTO(it.value.position, it.value.rotation, it.value.color, it.value.health) })
+                .mapValues { PlayerDTO(it.value.position, it.value.rotation, it.value.color, it.value.health, it.value.isReloading) })
         HelperFunctions.safeSend(session, Json.encodeToString(ServerMessage.serializer(), msg))
 
         println("connection has been made for $session && $id")

@@ -36,13 +36,20 @@ class PlayerNetworkObject : MonoBehaviour
         DamageableItem item = GetComponent<DamageableItem>();
         if (item != null)
         {
-            item.UpdateHealth(_transform.health, color, Color.red);
+            item.UpdateHealth(_transform.health);
         }
     }
 
     public void Shoot()
     {
-        if(gun == null) return;
+        if (gun == null) return;
         StartCoroutine(gun.Shoot());
+    }
+
+    public void Reload()
+    {
+        if (gun == null) return;
+        if (gun.isReloading) return;
+        StartCoroutine(gun.Reload());
     }
 }

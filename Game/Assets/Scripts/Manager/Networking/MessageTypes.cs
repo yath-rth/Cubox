@@ -58,6 +58,7 @@ public class PlayerDTO
     public Vector3 rotation;
     public string color;
     public int health;
+    public int isReloading;
 }
 
 public class BulletDTO
@@ -70,6 +71,7 @@ public class BulletDTO
 
 public class EnemyDTO
 {
+    public EnemyState state;
     public Vector3 position;
     public Vector3 direction;
     public int health;

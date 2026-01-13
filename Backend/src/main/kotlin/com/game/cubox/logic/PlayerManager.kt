@@ -14,11 +14,14 @@ class PlayerManager(
 ) {
 
     private val SPEED = 1f
-    val PLAYERSIZE = 0.5f
+    private val SHOOTINGSPEED = .5f
+    val PLAYERSIZE = 1.5f
     val BULLETSIZE = 0.01f
     private val BulletSpeed = 80f
     val deltaTime = 0.02f
-    private val BulletDmg = 10
+    private val BulletDmg = 20
+    val MAGSIZE = 20
+    val RELOADTIME = .5f
 
     private val muzzleOffset: Vector3 = Vector3(.752f, 0f, 0.95f)
 
@@ -30,23 +33,35 @@ class PlayerManager(
     fun addPlayer(id: String, session: WebSocketSession) {
         val player =
             PlayerEntity(
-                session,
-                Vector3(0f, PLAYERSIZE, 0f),
-                Vector3.Zero,
-                0,
-                0,
-                HelperFunctions.getRandomColor(),
-                100,
-                0.05f,
-                0f,
-                0f
+                state = PlayerState.NONE,
+                session = session,
+                position = Vector3(0f, PLAYERSIZE, 0f),
+                rotation = Vector3.Zero,
+                inputState = 0,
+                shootInput = 0,
+                color = HelperFunctions.getRandomColor(),
+                health = 100,
+                fireRate = 0.05f,
+                lastShootTIme = 0f,
+                timer = 0f,
+                ammo = MAGSIZE,
+                isReloading = 0,
+                lastReloadTIme = 0f
             )
         players[id] = player
 
         val msg = ServerMessage(
             type = ServerMessageType.PLAYER_JOIN,
             players = players.toMap()
-                .mapValues { PlayerDTO(it.value.position, it.value.rotation, it.value.color, it.value.health) })
+                .mapValues {
+                    PlayerDTO(
+                        it.value.position,
+                        it.value.rotation,
+                        it.value.color,
+                        it.value.health,
+                        it.value.isReloading
+                    )
+                })
 
         if ((players.keys.size) > 1) {
             for (ids in players.keys) {
@@ -73,7 +88,15 @@ class PlayerManager(
         val msg = ServerMessage(
             type = ServerMessageType.PLAYER_EXIT,
             players = players.toMap()
-                .mapValues { PlayerDTO(it.value.position, it.value.rotation, it.value.color, it.value.health) })
+                .mapValues {
+                    PlayerDTO(
+                        it.value.position,
+                        it.value.rotation,
+                        it.value.color,
+                        it.value.health,
+                        it.value.isReloading
+                    )
+                })
 
         if ((players.keys.size) > 1) {
             for (ids in players.keys) {
@@ -103,6 +126,10 @@ class PlayerManager(
                 else if (msg.inputType == 2) player.shootInput = msg.shootInput ?: player.shootInput
 
                 player.rotation = msg.rotation ?: player.rotation
+
+                if (player.shootInput == 1) player.state = PlayerState.SHOOTING
+                else if(player.inputState != 0) player.state = PlayerState.MOVING
+                else player.state = PlayerState.NONE
             }
         } catch (e: Exception) {
             println(e.message)
@@ -111,7 +138,8 @@ class PlayerManager(
 
     fun updatePosition() {
         for (player in players.values) {
-            player.position += HelperFunctions.checkInput(player.inputState) * SPEED
+            if (player.state == PlayerState.MOVING) player.position += HelperFunctions.checkInput(player.inputState) * SPEED
+            else if (player.state == PlayerState.SHOOTING) player.position += HelperFunctions.checkInput(player.inputState) * SHOOTINGSPEED
             player.timer += deltaTime
 
             //To check if players are out of bounds
@@ -140,9 +168,16 @@ class PlayerManager(
     fun shoot() {
         for (id in players.keys) {
             val player = players[id] ?: continue
+            if (player.isReloading == 1) {
+                if (player.lastReloadTIme < player.timer) {
+                    player.ammo = MAGSIZE
+                    player.isReloading = 0
+                } else continue
+            }
+
             if (player.shootInput == 0) continue
 
-            if(player.timer < player.lastShootTIme) continue
+            if (player.timer < player.lastShootTIme) continue
             player.lastShootTIme = player.timer + player.fireRate
 
             val muzzleWorldPos = Vector3.transformPoint(player.position, player.rotation, muzzleOffset)
@@ -156,6 +191,12 @@ class PlayerManager(
             )
 
             bullets[UUID.randomUUID().toString().slice(0..5)] = bullet
+            player.ammo--
+
+            if (player.ammo <= 0 && player.isReloading == 0) {
+                player.isReloading = 1
+                player.lastReloadTIme = player.timer + RELOADTIME
+            }
         }
     }
 

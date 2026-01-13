@@ -151,7 +151,7 @@ Material:
     m_Colors:
     - Base_Color: {r: 0.9716981, g: 0.46293157, b: 0.46293157, a: 0}
     - Color_1eaef94bae5d402486a19e5bc642b411: {r: 1, g: 1, b: 1, a: 0}
-    - Outline_Color: {r: 1, g: 0.5511101, b: 0.47450978, a: 0}
+    - Outline_Color: {r: 1, g: 0.12945142, b: 0.084905505, a: 0}
     - _BaseColor: {r: 0.5235849, g: 0.5235849, b: 0.5235849, a: 0}
     - _Color: {r: 0.52358484, g: 0.52358484, b: 0.52358484, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

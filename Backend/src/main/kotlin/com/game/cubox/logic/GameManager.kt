@@ -21,11 +21,11 @@ class GameManager(
         val msg =
             ServerMessage(
                 players = playerManager.getPlayers().toMap()
-                    .mapValues { PlayerDTO(it.value.position, it.value.rotation, it.value.color, it.value.health) },
+                    .mapValues { PlayerDTO(it.value.position, it.value.rotation, it.value.color, it.value.health, it.value.isReloading) },
                 bullets = playerManager.getBullets().toMap()
                     .mapValues { BulletDTO(it.value.position, it.value.direction, it.value.lifetime, it.value.owner) },
                 enemies = enemyManager.getEnemies().toMap()
-                    .mapValues { EnemyDTO(it.value.position, playerManager.getPlayers()[it.value.targetId]?.position ?: it.value.direction, it.value.health) }
+                    .mapValues { EnemyDTO(it.value.enemyState, it.value.position, playerManager.getPlayers()[it.value.targetId]?.position ?: it.value.direction, it.value.health) }
             )
 
         for (player in playerManager.getPlayers().values) {

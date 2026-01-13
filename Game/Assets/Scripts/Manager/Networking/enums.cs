@@ -24,3 +24,11 @@ public enum ServerMessageType
     PLAYER_EXIT,
     EXIT
 }
+
+public enum EnemyState
+{
+    NONE,
+    CHASING,
+    ATTACK,
+    DEAD
+}
