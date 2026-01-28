@@ -16,12 +16,8 @@ java {
 	}
 }
 
-springBoot{
-	mainClass.set("com.game.cubox.CuboxApplication")
-}
-
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
-	mainClass.set("com.game.cubox.CuboxApplication")
+	mainClass.set("com.game.cubox.CuboxApplicationKt")
 }
 
 
