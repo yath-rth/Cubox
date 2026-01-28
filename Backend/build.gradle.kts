@@ -16,6 +16,10 @@ java {
 	}
 }
 
+springboot{
+	mainClass.set("com.game.cubox.CuboxApplicationKt")
+}
+
 configurations {
 	compileOnly {
 		extendsFrom(configurations.annotationProcessor.get())

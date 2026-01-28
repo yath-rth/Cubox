@@ -14,6 +14,7 @@ RUN ./gradlew dependencies
 
 # Copy source code
 COPY src src
+RUN ls src/main/kotlin/com/game/cubox
 
 # Build the boot jar
 RUN ./gradlew bootJar
