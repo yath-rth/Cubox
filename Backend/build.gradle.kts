@@ -16,7 +16,7 @@ java {
 	}
 }
 
-springboot{
+springBoot{
 	mainClass.set("com.game.cubox.CuboxApplicationKt")
 }
 
