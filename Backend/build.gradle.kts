@@ -17,9 +17,8 @@ java {
 }
 
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
-	mainClass.set("com.game.cubox.CuboxApplicationKt")
+	mainClass.set("com.game.cubox.CuboxApplication")
 }
-
 
 configurations {
 	compileOnly {
