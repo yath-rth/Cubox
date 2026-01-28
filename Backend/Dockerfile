@@ -9,6 +9,7 @@ COPY gradle gradle
 COPY build.gradle.kts settings.gradle.kts ./
 
 # Download dependencies
+RUN chmod +x gradlew
 RUN ./gradlew dependencies
 
 # Copy source code
