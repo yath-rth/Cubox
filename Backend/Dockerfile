@@ -14,6 +14,7 @@ RUN ./gradlew dependencies
 
 COPY . .
 RUN ls -R src/main/kotlin
+RUN chmod +x gradlew
 RUN ./gradlew clean bootJar
 
 
