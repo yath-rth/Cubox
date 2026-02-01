@@ -10,49 +10,75 @@ import kotlin.math.sqrt
 class GameManager(
     private val playerManager: PlayerManager,
     private val enemyManager: EnemyManager,
+    private val roomManager: RoomManager
 ) {
-
-    private val bulletsToRemove: MutableList<String> = mutableListOf()
-    private val bulletGrid = mutableMapOf<Cell, MutableList<Bullet>>()
-
     fun updateWorld() {
-        if (playerManager.getPlayers().isEmpty()) return
+        for (roomObj in roomManager.rooms) {
+            val room = roomObj.value
+            if (room.players.isEmpty()) return
 
-        val msg =
-            ServerMessage(
-                players = playerManager.getPlayers().toMap()
-                    .mapValues { PlayerDTO(it.value.position, it.value.rotation, it.value.color, it.value.health, it.value.isReloading) },
-                bullets = playerManager.getBullets().toMap()
-                    .mapValues { BulletDTO(it.value.position, it.value.direction, it.value.lifetime, it.value.owner) },
-                enemies = enemyManager.getEnemies().toMap()
-                    .mapValues { EnemyDTO(it.value.enemyState, it.value.position, playerManager.getPlayers()[it.value.targetId]?.position ?: it.value.direction, it.value.health) }
-            )
+            val msg =
+                ServerMessage(
+                    id = roomObj.key,
+                    players = room.players.toMap()
+                        .mapValues {
+                            PlayerDTO(
+                                it.value.position,
+                                it.value.rotation,
+                                it.value.color,
+                                it.value.health,
+                                it.value.isReloading,
+                                it.value.score
+                            )
+                        },
+                    bullets = room.bullets.toMap()
+                        .mapValues {
+                            BulletDTO(
+                                it.value.position,
+                                it.value.direction,
+                                it.value.lifetime,
+                                it.value.owner
+                            )
+                        },
+                    enemies = room.enemies.toMap()
+                        .mapValues {
+                            EnemyDTO(
+                                it.value.enemyState,
+                                it.value.position,
+                                room.players[it.value.targetId]?.position ?: it.value.direction,
+                                it.value.health
+                            )
+                        }
+                )
 
-        for (player in playerManager.getPlayers().values) {
-            if (!player.session.isOpen) continue
-            HelperFunctions.safeSend(player.session, Json.encodeToString(ServerMessage.serializer(), msg))
+            for (player in room.players.values) {
+                if (!player.session.isOpen) continue
+                HelperFunctions.safeSend(player.session, Json.encodeToString(ServerMessage.serializer(), msg))
+            }
         }
     }
 
     fun collisionCheck() {
-        for(bullet in playerManager.getBullets().values){
-            val cell = Cell(
-                floor(bullet.position.x / enemyManager.enemySize).toInt(),
-                floor(bullet.position.y / enemyManager.enemySize).toInt()
-            )
-            bulletGrid.computeIfAbsent(cell) { mutableListOf() }.add(bullet)
-        }
+        for(room in roomManager.rooms.values) {
+            for (bullet in room.bullets.values) {
+                val cell = Cell(
+                    floor(bullet.position.x / enemyManager.enemySize).toInt(),
+                    floor(bullet.position.y / enemyManager.enemySize).toInt()
+                )
+                room.bulletGrid.computeIfAbsent(cell) { mutableListOf() }.add(bullet)
+            }
 
-        checkBulletCollision()
+            checkBulletCollision(room)
 
-        for (id in playerManager.getBullets().keys) {
-            val bullet = playerManager.getBullets()[id] ?: continue
+            for (id in room.bullets.keys) {
+                val bullet = room.bullets[id] ?: continue
 
-            //TODO: Implement bullet collision with enemies and breakable objects
-            //instead of hardcoding a type of object can get damaged make a new list for like damageable objects
-            //like the script you have in unity which gives any object health and option to break even if they have a movement script attached to them
+                //TODO: Implement bullet collision with enemies and breakable objects
+                //instead of hardcoding a type of object can get damaged make a new list for like damageable objects
+                //like the script you have in unity which gives any object health and option to break even if they have a movement script attached to them
+                //ie a modular system which separates movement logic from health logic as static objects can also be broken and moving objects not
 
-            // Uncomment this if u want friendly fire in the game
+                // Uncomment this if u want friendly fire in the game
 //            for (playerId in players.keys) {
 //                val player = players[playerId] ?: continue
 //                if (playerId == bullet.owner) continue
@@ -67,29 +93,30 @@ class GameManager(
 //                }
 //            }
 
-        }
+            }
 
-        for (id in bulletsToRemove) {
-            playerManager.getBullets().remove(id)
+            for (id in room.bulletsToRemove) {
+                room.bullets.remove(id)
+            }
+            room.bulletsToRemove.clear()
         }
-        bulletsToRemove.clear()
     }
 
-    fun checkBulletCollision(){
+    fun checkBulletCollision(room: Room) {
         val offsets = listOf(
             -1 to -1, 0 to -1, 1 to -1,
             -1 to 0, 0 to 0, 1 to 0,
             -1 to 1, 0 to 1, 1 to 1
         )
 
-        for (id in playerManager.getBullets().keys) {
-            val bullet = playerManager.getBullets()[id] ?: continue
+        for (id in room.bullets.keys) {
+            val bullet = room.bullets[id] ?: continue
 
             val cx = floor(bullet.position.x / enemyManager.enemySize).toInt()
             val cz = floor(bullet.position.z / enemyManager.enemySize).toInt()
 
             for ((dx, dz) in offsets) {
-                val list = enemyManager.getGrid()[Cell(cx + dx, cz + dz)] ?: continue
+                val list = room.grid[Cell(cx + dx, cz + dz)] ?: continue
 
                 for (other in list) {
                     val delta = bullet.position - other.position
@@ -98,7 +125,8 @@ class GameManager(
 
                     if (distSq < minDist * minDist) {
                         other.health -= bullet.damage
-                        bulletsToRemove.add(id)
+                        other.lastPlayerThatDamaged = bullet.owner
+                        room.bulletsToRemove.add(id)
                     }
                 }
             }

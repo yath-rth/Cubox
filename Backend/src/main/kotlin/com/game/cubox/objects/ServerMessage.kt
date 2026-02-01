@@ -12,10 +12,11 @@ class ServerMessage(
     var enemies: Map<String, EnemyDTO>? = null
 ) {
     constructor(
+        id: String?,
         players: Map<String, PlayerDTO>,
         bullets: Map<String, BulletDTO>,
         enemies: Map<String, EnemyDTO>?
-    ) : this(type = ServerMessageType.UPDATE, players = players, bullets = bullets, enemies = enemies)
+    ) : this(type = ServerMessageType.UPDATE, id = id, players = players, bullets = bullets, enemies = enemies)
 }
 
 @Serializable
@@ -24,7 +25,8 @@ data class PlayerDTO(
     var rotation: Vector3,
     var color: String,
     var health: Int,
-    var isReloading: Int
+    var isReloading: Int,
+    var score: Int
 )
 
 @Serializable

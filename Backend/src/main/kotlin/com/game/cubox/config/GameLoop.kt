@@ -30,8 +30,6 @@ class GameLoop(
     private val scheduler = Executors.newSingleThreadScheduledExecutor()
 
     fun start() {
-        worldManager.createWorld()
-
         scheduler.scheduleAtFixedRate(
             { tick() },
             0,

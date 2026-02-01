@@ -2,6 +2,7 @@ package com.game.cubox.logic
 
 import com.game.cubox.objects.Enemy
 import com.game.cubox.objects.EnemyState
+import com.game.cubox.objects.Room
 import com.game.cubox.objects.Vector3
 import lombok.experimental.Helper
 import org.springframework.stereotype.Component
@@ -12,82 +13,84 @@ import kotlin.math.sqrt
 @Component
 class EnemyManager(
     private val worldManager: WorldManager,
-    private val playerManager: PlayerManager
+    private val playerManager: PlayerManager,
+    private val roomManager: RoomManager
 ) {
-
-    private val enemies: MutableMap<String, Enemy> = mutableMapOf()
-    private val deadEnemies: MutableList<String> = mutableListOf()
-    private val grid = mutableMapOf<Cell, MutableList<Enemy>>()
-
     //Enemy Movement Variables
     private val enemySpeed = 0.08f
     val enemySize = 0.75f
 
-    //Variables to spawn
-    private var timer = 0f
-    private val timeBTWspawn = 1f
-    private var lastSpawnTime = 0f
-
-    fun getEnemies() = enemies
-    fun getGrid() = grid
-
     fun updateEnemies() {
-        grid.clear()
+        for (room in roomManager.rooms.values) {
+            room.grid.clear()
 
-        for (enemy in enemies.values) {
-            val cell = Cell(
-                floor(enemy.position.x / enemySize).toInt(),
-                floor(enemy.position.z / enemySize).toInt()
-            )
-
-            grid.computeIfAbsent(cell) { mutableListOf() }.add(enemy)
-        }
-
-        if (timer > lastSpawnTime && playerManager.getPlayers().isNotEmpty()) {
-            lastSpawnTime = timer + timeBTWspawn;
-            createEnemy()
-        }
-
-        for (id in enemies.keys) {
-            val enemy = enemies[id] ?: continue
-            val player = (playerManager.getPlayer(enemy.targetId)
-                ?: playerManager.getPlayer(playerManager.getClosestPlayer(enemy.position))) ?: continue
-
-            enemy.direction = player.position - enemy.position
-            if(HelperFunctions.distance(player.position, enemy.position) > (enemySize + playerManager.PLAYERSIZE + 0.1f)) {
-                enemy.position += enemy.direction * enemySpeed
+            if (room.players.isEmpty()) { //Return if no player is currently in the room
+                room.enemies.clear()
+                return
             }
 
-            if (enemy.health <= 0) {
-                deadEnemies.add(id)
+            for (enemy in room.enemies.values) {
+                val cell = Cell(
+                    floor(enemy.position.x / enemySize).toInt(),
+                    floor(enemy.position.z / enemySize).toInt()
+                )
+
+                room.grid.computeIfAbsent(cell) { mutableListOf() }.add(enemy)
             }
+
+            if (room.timer > room.lastSpawnTime && room.players.isNotEmpty()) {
+                room.lastSpawnTime = room.timer + room.timeBTWspawn;
+                createEnemy(room)
+            }
+
+            for (id in room.enemies.keys) {
+                val enemy = room.enemies[id] ?: continue
+                val player = (room.players[enemy.targetId]
+                    ?: room.players[playerManager.getClosestPlayer(enemy.position, room)]) ?: continue
+
+                enemy.direction = player.position - enemy.position
+                if (HelperFunctions.distance(
+                        player.position,
+                        enemy.position
+                    ) > (enemySize + playerManager.PLAYERSIZE + 0.1f)
+                ) {
+                    enemy.position += enemy.direction * enemySpeed
+                }
+
+                if (enemy.health <= 0) {
+                    if (room.players.keys.contains(enemy.lastPlayerThatDamaged)) {
+                        val _player = room.players[enemy.lastPlayerThatDamaged]
+                        if (_player != null) _player.score++
+                    }
+                    room.deadEnemies.add(id)
+                }
+            }
+
+            resolveEnemyCollisions(room)
+
+            for (id in room.deadEnemies) {
+                if (!room.enemies.containsKey(id)) continue
+                room.enemies.remove(id)
+            }
+
+            if (room.players.isNotEmpty()) room.timer += playerManager.deltaTime
         }
-
-        resolveEnemyCollisions()
-
-        for (id in deadEnemies) {
-            if (!enemies.containsKey(id)) continue
-            enemies.remove(id)
-        }
-
-        if (playerManager.getPlayers().isNotEmpty()) timer += playerManager.deltaTime;
-        playerManager.updateEnemies(enemies)
     }
 
-    fun resolveEnemyCollisions() {
+    fun resolveEnemyCollisions(room: Room) {
         val offsets = listOf(
             -1 to -1, 0 to -1, 1 to -1,
             -1 to 0, 0 to 0, 1 to 0,
             -1 to 1, 0 to 1, 1 to 1
         )
 
-        for (enemy in enemies.values) {
+        for (enemy in room.enemies.values) {
 
             val cx = floor(enemy.position.x / enemySize).toInt()
             val cz = floor(enemy.position.z / enemySize).toInt()
 
             for ((dx, dz) in offsets) {
-                val list = grid[Cell(cx + dx, cz + dz)] ?: continue
+                val list = room.grid[Cell(cx + dx, cz + dz)] ?: continue
 
                 for (other in list) {
                     if (other === enemy) continue
@@ -110,19 +113,19 @@ class EnemyManager(
 
             enemy.position = HelperFunctions.checkIfOutOfBounds(
                 enemy.position,
-                worldManager.mapX * 1f,
-                worldManager.mapY * 1f,
+                room.mapX * 1f,
+                room.mapY * 1f,
                 enemySize
             )
         }
     }
 
-    fun createEnemy() {
-        val spawnPosition = worldManager.getRandomPosition()
-        val playerID = playerManager.getClosestPlayer(spawnPosition) ?: return
-        val player = playerManager.getPlayer(playerID) ?: return
+    fun createEnemy(room: Room) {
+        val spawnPosition = worldManager.getRandomPosition(room)
+        val playerID = playerManager.getClosestPlayer(spawnPosition, room) ?: return
+        val player = room.players[playerID] ?: return
 
-        val enemy = Enemy(EnemyState.NONE, spawnPosition, player.position - spawnPosition, 5, playerID, 30)
-        enemies[UUID.randomUUID().toString().slice(0..5)] = enemy
+        val enemy = Enemy(EnemyState.NONE, spawnPosition, player.position - spawnPosition, 5, playerID, 30, "")
+        room.enemies[UUID.randomUUID().toString().slice(0..5)] = enemy
     }
 }

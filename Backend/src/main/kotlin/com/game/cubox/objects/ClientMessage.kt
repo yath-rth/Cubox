@@ -4,6 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class ClientMessage(
+    val type: Int,
+    val roomId: String,
     val playerId: String,
     val inputType: Int? = null,
     val shootInput: Int? = null,

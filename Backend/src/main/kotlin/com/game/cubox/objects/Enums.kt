@@ -2,16 +2,18 @@ package com.game.cubox.objects
 
 enum class ServerMessageType {
     WELCOME,
+    JOINED,
     UPDATE,
     PLAYER_JOIN,
     PLAYER_EXIT,
     EXIT
 }
 
-enum class InputType {
+enum class RoomState{
     NONE,
-    MOVE,
-    SHOOT
+    OPEN,
+    PLAYING,
+    CLOSED
 }
 
 enum class EnemyState{

@@ -9,12 +9,11 @@ import java.util.*
 
 @Component
 class PlayerManager(
-    private val worldManager: WorldManager,
-//    private val enemyManager: EnemyManager
+    private val roomManager: RoomManager
 ) {
 
-    private val SPEED = 1f
-    private val SHOOTINGSPEED = .5f
+    private val SPEED = 1.2f
+    private val SHOOTINGSPEED = .3f
     val PLAYERSIZE = 1.5f
     val BULLETSIZE = 0.01f
     private val BulletSpeed = 80f
@@ -25,12 +24,7 @@ class PlayerManager(
 
     private val muzzleOffset: Vector3 = Vector3(.752f, 0f, 0.95f)
 
-    private val players: MutableMap<String, PlayerEntity> = mutableMapOf()
-    private val bullets: MutableMap<String, Bullet> = mutableMapOf()
-    private var enemies: Map<String, Enemy> = emptyMap()
-    private val bulletsToRemove: MutableList<String> = mutableListOf()
-
-    fun addPlayer(id: String, session: WebSocketSession) {
+    fun addPlayer(id: String, session: WebSocketSession, room: Room) {
         val player =
             PlayerEntity(
                 state = PlayerState.NONE,
@@ -46,26 +40,28 @@ class PlayerManager(
                 timer = 0f,
                 ammo = MAGSIZE,
                 isReloading = 0,
-                lastReloadTIme = 0f
+                lastReloadTIme = 0f,
+                score = 0
             )
-        players[id] = player
+        room.players[id] = player
 
         val msg = ServerMessage(
             type = ServerMessageType.PLAYER_JOIN,
-            players = players.toMap()
+            players = room.players.toMap()
                 .mapValues {
                     PlayerDTO(
                         it.value.position,
                         it.value.rotation,
                         it.value.color,
                         it.value.health,
-                        it.value.isReloading
+                        it.value.isReloading,
+                        it.value.score
                     )
                 })
 
-        if ((players.keys.size) > 1) {
-            for (ids in players.keys) {
-                val _player = players[ids] ?: continue
+        if ((room.players.keys.size) > 1) {
+            for (ids in room.players.keys) {
+                val _player = room.players[ids] ?: continue
 
                 if (id != ids && _player.session.isOpen) {
                     HelperFunctions.safeSend(
@@ -79,48 +75,39 @@ class PlayerManager(
         }
     }
 
-    fun getPlayers() = players
-    fun getBullets() = bullets
-
-    fun removePlayer(id: String) {
-        players.remove(id)
+    fun removePlayer(id: String, room: Room) {
+        room.players.remove(id)
 
         val msg = ServerMessage(
             type = ServerMessageType.PLAYER_EXIT,
-            players = players.toMap()
+            players = room.players.toMap()
                 .mapValues {
                     PlayerDTO(
                         it.value.position,
                         it.value.rotation,
                         it.value.color,
                         it.value.health,
-                        it.value.isReloading
+                        it.value.isReloading,
+                        it.value.score
                     )
                 })
 
-        if ((players.keys.size) > 1) {
-            for (ids in players.keys) {
-                val player = players[ids] ?: continue
-
-                if (id != ids && player.session.isOpen) {
-                    HelperFunctions.safeSend(
-                        player.session,
-                        Json.encodeToString(
-                            ServerMessage.serializer(), msg
-                        )
+        for (ids in room.players.keys) {
+            val player = room.players[ids] ?: continue
+            if (id != ids && player.session.isOpen) {
+                HelperFunctions.safeSend(
+                    player.session,
+                    Json.encodeToString(
+                        ServerMessage.serializer(), msg
                     )
-                }
+                )
             }
         }
     }
 
-    fun updateEnemies(enemies: Map<String, Enemy>) {
-        this.enemies = enemies
-    }
-
-    fun updateInputState(msg: ClientMessage) {
+    fun updateInputState(msg: ClientMessage, room: Room) {
         try {
-            val player = players[msg.playerId]
+            val player = room.players[msg.playerId]
             if (player != null) {
                 if (msg.inputType == 1) player.inputState = msg.input ?: player.inputState
                 else if (msg.inputType == 2) player.shootInput = msg.shootInput ?: player.shootInput
@@ -128,7 +115,7 @@ class PlayerManager(
                 player.rotation = msg.rotation ?: player.rotation
 
                 if (player.shootInput == 1) player.state = PlayerState.SHOOTING
-                else if(player.inputState != 0) player.state = PlayerState.MOVING
+                else if (player.inputState != 0) player.state = PlayerState.MOVING
                 else player.state = PlayerState.NONE
             }
         } catch (e: Exception) {
@@ -137,77 +124,81 @@ class PlayerManager(
     }
 
     fun updatePosition() {
-        for (player in players.values) {
-            if (player.state == PlayerState.MOVING) player.position += HelperFunctions.checkInput(player.inputState) * SPEED
-            else if (player.state == PlayerState.SHOOTING) player.position += HelperFunctions.checkInput(player.inputState) * SHOOTINGSPEED
-            player.timer += deltaTime
+        for(room in roomManager.rooms.values) {
+            for (player in room.players.values) {
+                if (player.state == PlayerState.MOVING) player.position += HelperFunctions.checkInput(player.inputState) * SPEED
+                else if (player.state == PlayerState.SHOOTING) player.position += HelperFunctions.checkInput(player.inputState) * SHOOTINGSPEED
+                player.timer += deltaTime
 
-            //To check if players are out of bounds
-            player.position = HelperFunctions.checkIfOutOfBounds(
-                player.position,
-                mapX = worldManager.mapX * 1f,
-                mapY = worldManager.mapY * 1f,
-                PLAYERSIZE
-            )
+                //To check if players are out of bounds
+                player.position = HelperFunctions.checkIfOutOfBounds(
+                    player.position,
+                    mapX = room.mapX * 1f,
+                    mapY = room.mapY * 1f,
+                    PLAYERSIZE
+                )
+            }
+
+            for (id in room.bullets.keys) {
+                val _bullet = room.bullets[id] ?: continue
+
+                _bullet.position += _bullet.direction * deltaTime
+                _bullet.lifetime -= deltaTime
+                if (_bullet.lifetime <= 0) room.bulletsToRemove.add(id);
+            }
+
+            for (id in room.bulletsToRemove) {
+                room.bullets.remove(id)
+            }
+            room.bulletsToRemove.clear()
         }
-
-        for (id in bullets.keys) {
-            val _bullet = bullets[id] ?: continue
-
-            _bullet.position += _bullet.direction * deltaTime
-            _bullet.lifetime -= deltaTime
-            if (_bullet.lifetime <= 0) bulletsToRemove.add(id);
-        }
-
-        for (id in bulletsToRemove) {
-            bullets.remove(id)
-        }
-        bulletsToRemove.clear()
     }
 
     fun shoot() {
-        for (id in players.keys) {
-            val player = players[id] ?: continue
-            if (player.isReloading == 1) {
-                if (player.lastReloadTIme < player.timer) {
-                    player.ammo = MAGSIZE
-                    player.isReloading = 0
-                } else continue
-            }
+        for(room in roomManager.rooms.values) {
+            for (id in room.players.keys) {
+                val player = room.players[id] ?: continue
+                if (player.isReloading == 1) {
+                    if (player.lastReloadTIme < player.timer) {
+                        player.ammo = MAGSIZE
+                        player.isReloading = 0
+                    } else continue
+                }
 
-            if (player.shootInput == 0) continue
+                if (player.shootInput == 0) continue
 
-            if (player.timer < player.lastShootTIme) continue
-            player.lastShootTIme = player.timer + player.fireRate
+                if (player.timer < player.lastShootTIme) continue
+                player.lastShootTIme = player.timer + player.fireRate
 
-            val muzzleWorldPos = Vector3.transformPoint(player.position, player.rotation, muzzleOffset)
+                val muzzleWorldPos = Vector3.transformPoint(player.position, player.rotation, muzzleOffset)
 
-            val bullet = Bullet(
-                position = muzzleWorldPos,
-                direction = Vector3.directionFromRotation(player.rotation * -1f) * BulletSpeed,
-                owner = id,
-                lifetime = 0.15f,
-                BulletDmg
-            )
+                val bullet = Bullet(
+                    position = muzzleWorldPos,
+                    direction = Vector3.directionFromRotation(player.rotation * -1f) * BulletSpeed,
+                    owner = id,
+                    lifetime = 0.15f,
+                    BulletDmg
+                )
 
-            bullets[UUID.randomUUID().toString().slice(0..5)] = bullet
-            player.ammo--
+                room.bullets[UUID.randomUUID().toString().slice(0..5)] = bullet
+                player.ammo--
 
-            if (player.ammo <= 0 && player.isReloading == 0) {
-                player.isReloading = 1
-                player.lastReloadTIme = player.timer + RELOADTIME
+                if (player.ammo <= 0 && player.isReloading == 0) {
+                    player.isReloading = 1
+                    player.lastReloadTIme = player.timer + RELOADTIME
+                }
             }
         }
     }
 
-    fun getClosestPlayer(position: Vector3): String? {
+    fun getClosestPlayer(position: Vector3, room: Room): String? {
         var distance = 9999f
         var _player: String? = null
 
-        if (players.isNotEmpty()) _player = players.keys.first()
+        if (room.players.isNotEmpty()) _player = room.players.keys.first()
 
-        for (id in players.keys) {
-            val player = players[id] ?: continue
+        for (id in room.players.keys) {
+            val player = room.players[id] ?: continue
 
             if (distance > HelperFunctions.distance(player.position, position)) {
                 distance = HelperFunctions.distance(player.position, position)
@@ -216,10 +207,5 @@ class PlayerManager(
         }
 
         return _player
-    }
-
-    fun getPlayer(id: String?): PlayerEntity? {
-        if (!players.containsKey(id)) return null
-        return players[id]
     }
 }
