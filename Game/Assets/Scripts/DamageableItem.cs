@@ -55,8 +55,11 @@ public class DamageableItem : MonoBehaviour
         else if (health <= 0)
         {
             Alive = false;
-            GameObject obj = Instantiate(deathEffect, transform.position + new Vector3(0, 2f, 0), Quaternion.Euler(0, -transform.rotation.y, 0), null);
-            StartCoroutine(obj.GetComponent<DeathEffect>().cleanUp());
+            if (deathEffect != null)
+            {
+                GameObject obj = Instantiate(deathEffect, transform.position + new Vector3(0, 2f, 0), Quaternion.Euler(0, -transform.rotation.y, 0), null);
+                if (obj != null) StartCoroutine(obj.GetComponent<DeathEffect>().cleanUp());
+            }
         }
 
 

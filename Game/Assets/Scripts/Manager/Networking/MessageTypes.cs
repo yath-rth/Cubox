@@ -5,6 +5,8 @@ using UnityEngine;
 [Serializable]
 public class ClientMessage
 {
+    public ClientMessageType type;
+    public String roomId;
     public string playerId;
     public InputType? inputType = null;
     public int? shootInput = null;
@@ -13,27 +15,41 @@ public class ClientMessage
 
     public ClientMessage(string id, InputType type, InputDir input)
     {
+        this.type = ClientMessageType.UPDATE;
         playerId = id;
         inputType = type;
         this.input = input;
     }
 
-    public ClientMessage(string id, Vector3 rotation)
+    public ClientMessage(ClientMessageType type, string roomId, string id)
     {
+        this.type = type;
+        this.roomId = roomId;
+        this.playerId = id;
+    }
+
+    public ClientMessage(string roomId, string id, Vector3 rotation)
+    {
+        this.type = ClientMessageType.UPDATE;
+        this.roomId = roomId;
         playerId = id;
         this.rotation = new RotationDTO(rotation);
     }
 
-    public ClientMessage(string id, InputType type, int shootInput, Vector3 rotation)
+    public ClientMessage(string roomId, string id, InputType type, int shootInput, Vector3 rotation)
     {
+        this.type = ClientMessageType.UPDATE;
+        this.roomId = roomId;
         playerId = id;
         inputType = type;
         this.shootInput = shootInput;
         this.rotation = new RotationDTO(rotation);
     }
 
-    public ClientMessage(string id, InputType type, InputDir input, Vector3 rotation)
+    public ClientMessage(string roomId, string id, InputType type, InputDir input, Vector3 rotation)
     {
+        this.type = ClientMessageType.UPDATE;
+        this.roomId = roomId;
         playerId = id;
         inputType = type;
         this.input = input;
@@ -59,6 +75,7 @@ public class PlayerDTO
     public string color;
     public int health;
     public int isReloading;
+    public int score;
 }
 
 public class BulletDTO

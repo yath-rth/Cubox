@@ -117,7 +117,7 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 3
+      scalar: 8
       minScalar: 5
       maxCurve:
         serializedVersion: 2
@@ -871,7 +871,7 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 500
+      scalar: 10
       minScalar: 10
       maxCurve:
         serializedVersion: 2
@@ -981,7 +981,7 @@ ParticleSystem:
       countCurve:
         serializedVersion: 2
         minMaxState: 0
-        scalar: 500
+        scalar: 50
         minScalar: 30
         maxCurve:
           serializedVersion: 2
@@ -4908,3 +4908,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6640f15ca099c9e47a401a169d72ba41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DeathEffect
+  duration: 8

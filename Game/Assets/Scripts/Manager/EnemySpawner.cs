@@ -27,7 +27,8 @@ public class EnemySpawner : MonoBehaviour
         {
             if (!enemies.ContainsKey(id) && ObjectPooler.instance != null)
             {
-                StartCoroutine(SpawnEnemy(msg, id));
+                //StartCoroutine(SpawnEnemy(msg, id));
+                SpawnEnemy(msg, id);
             }
 
             if (enemies[id] == null) continue;
@@ -93,7 +94,7 @@ public class EnemySpawner : MonoBehaviour
     //     }
     // }
 
-    IEnumerator SpawnEnemy(ServerMessage msg, string id)
+    void SpawnEnemy(ServerMessage msg, string id)
     {
         float spawnTimer = 0;
         GameObject newTile = Grid.getTileAtPosition(msg.enemies[id].position);
@@ -104,20 +105,20 @@ public class EnemySpawner : MonoBehaviour
         enemy.transform.LookAt(msg.enemies[id].direction);
         enemies[id] = enemy;
 
-        if (newTile != null)
-        {
-            Material newTileMat = newTile.GetComponent<Renderer>().material;
+        // if (newTile != null)
+        // {
+        //     Material newTileMat = newTile.GetComponent<Renderer>().material;
 
-            while (spawnTimer < spawnTime / 3)
-            {
-                newTileMat.SetFloat("Amt_Of_Outline", Mathf.PingPong(spawnTimer, 2));
+        //     while (spawnTimer < spawnTime / 3)
+        //     {
+        //         newTileMat.SetFloat("Amt_Of_Outline", Mathf.PingPong(spawnTimer, 2));
 
-                spawnTimer += Time.deltaTime;
-                yield return null;
-            }
+        //         spawnTimer += Time.deltaTime;
+        //         yield return null;
+        //     }
 
-            newTileMat.SetFloat("Amt_Of_Outline", 2);
-        }
+        //     newTileMat.SetFloat("Amt_Of_Outline", 2);
+        // }
     }
 }
 

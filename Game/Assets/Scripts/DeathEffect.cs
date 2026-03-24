@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class DeathEffect : MonoBehaviour
 {
+    [SerializeField] float duration = 3f;
+
     void Awake()
     {
         StartCoroutine(cleanUp());
@@ -10,7 +12,7 @@ public class DeathEffect : MonoBehaviour
 
     public IEnumerator cleanUp()
     {
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(duration);
         DestroyImmediate(gameObject);
     }
 }

@@ -19,9 +19,17 @@ public enum InputType
 public enum ServerMessageType
 {
     WELCOME,
+    JOINED,
     UPDATE,
     PLAYER_JOIN,
     PLAYER_EXIT,
+    EXIT
+}
+
+public enum ClientMessageType
+{
+    JOIN,
+    UPDATE,
     EXIT
 }
 

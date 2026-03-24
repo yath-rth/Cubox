@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.Data.Common;
 using System.Linq;
+using Unity.Mathematics;
+using TMPro;
 
 
 public class ConnectionManager : MonoBehaviour
@@ -15,13 +17,17 @@ public class ConnectionManager : MonoBehaviour
     EnemySpawner enemySpawn;
     WebSocket ws;
     public string playerId;
+    public string roomId;
     [SerializeField] GameObject playerPrefab;
     Dictionary<string, PlayerNetworkObject> players = new Dictionary<string, PlayerNetworkObject>();
+    bool hasPlayerId = false, hasJoined = false;
 
-    bool hasPlayerId = false;
+    [SerializeField] TMP_Text roomIdText;
 
     private void Awake()
     {
+        Application.targetFrameRate = 165;
+
         if (instance != null) Destroy(this);
         instance = this;
 
@@ -31,9 +37,51 @@ public class ConnectionManager : MonoBehaviour
 
     async void Start()
     {
-        ws = new WebSocket("ws://localhost:8080/game");
+        Connect();
+    }
 
-        ws.OnOpen += () =>
+    public void UpdateRoomId(string _roomId)
+    {
+        roomId = _roomId;
+    }
+
+    public async void JoinRoom()
+    {
+        if (roomId.Length != 6) return;
+
+        if (ws.State == WebSocketState.Open)
+        {
+            ClientMessage msg = new ClientMessage(ClientMessageType.JOIN, roomId, playerId);
+            await ws.SendText(JsonConvert.SerializeObject(msg, Formatting.None, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                NullValueHandling = NullValueHandling.Ignore
+            }));
+
+            hasJoined = true;
+        }
+    }
+
+    public async void CreateRoom()
+    {
+        if (ws.State == WebSocketState.Open)
+        {
+            ClientMessage msg = new ClientMessage(ClientMessageType.JOIN, "CreateRoom", playerId);
+            await ws.SendText(JsonConvert.SerializeObject(msg, Formatting.None, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                NullValueHandling = NullValueHandling.Ignore
+            }));
+
+            hasJoined = true;
+        }
+    }
+
+    async void Connect()
+    {
+        ws = new WebSocket("wss://cubox.onrender.com/game");
+
+        ws.OnOpen += async () =>
         {
             Debug.Log("Connection open!");
         };
@@ -54,7 +102,6 @@ public class ConnectionManager : MonoBehaviour
             var message = System.Text.Encoding.UTF8.GetString(bytes);
             var jsonMsg = JsonConvert.DeserializeObject<ServerMessage>(message);
 
-            //Debug.Log(message);
             onMessageRecieve(jsonMsg);
         };
 
@@ -70,15 +117,21 @@ public class ConnectionManager : MonoBehaviour
 #if !UNITY_WEBGL || UNITY_EDITOR
         ws.DispatchMessageQueue();
 #endif
+
+        if (roomIdText != null)
+        {
+            roomIdText.text = roomId;
+        }
     }
 
     public async void SendShootInput(InputType type, int shootInput)
     {
         if (!hasPlayerId) return;
+        if (!hasJoined) return;
 
         if (ws.State == WebSocketState.Open)
         {
-            ClientMessage cm = new ClientMessage(playerId, type, shootInput, Player.playerInstance.transform.eulerAngles);
+            ClientMessage cm = new ClientMessage(roomId, playerId, type, shootInput, Player.playerInstance.transform.eulerAngles);
             await ws.SendText(JsonConvert.SerializeObject(cm, Formatting.None, new JsonSerializerSettings()
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
@@ -90,10 +143,11 @@ public class ConnectionManager : MonoBehaviour
     public async void SendInput(InputType type, InputDir input)
     {
         if (!hasPlayerId) return;
+        if (!hasJoined) return;
 
         if (ws.State == WebSocketState.Open)
         {
-            ClientMessage pim = new ClientMessage(playerId, type, input, Player.playerInstance.transform.eulerAngles);
+            ClientMessage pim = new ClientMessage(roomId, playerId, type, input, Player.playerInstance.transform.eulerAngles);
             await ws.SendText(JsonConvert.SerializeObject(pim, Formatting.None, new JsonSerializerSettings()
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
@@ -105,10 +159,11 @@ public class ConnectionManager : MonoBehaviour
     async void SendRotation()
     {
         if (!hasPlayerId) return;
+        if (!hasJoined) return;
 
         if (ws.State == WebSocketState.Open)
         {
-            ClientMessage msg = new ClientMessage(playerId, Player.playerInstance.transform.eulerAngles);
+            ClientMessage msg = new ClientMessage(roomId, playerId, Player.playerInstance.transform.eulerAngles);
             await ws.SendText(JsonConvert.SerializeObject(msg, Formatting.None, new JsonSerializerSettings()
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
@@ -145,15 +200,18 @@ public class ConnectionManager : MonoBehaviour
 
     void onMessageRecieve(ServerMessage msg)
     {
-        //Debug.Log(msg.players == null);
-
         if (msg.type == ServerMessageType.WELCOME && msg.id != null)
         {
             playerId = msg.id;
             players[playerId] = Player.playerInstance.GetComponent<PlayerNetworkObject>();
-            if (players[playerId] != null) players[playerId].SetUp(msg, playerId);
             hasPlayerId = true;
 
+            if (msg.players != null) spawnPlayer(msg);
+        }
+
+        if (msg.type == ServerMessageType.JOINED && msg.id != null)
+        {
+            if (players[playerId] != null) players[playerId].SetUp(msg, playerId);
             if (msg.mapSize != null) grid.Grid.SetUpWorldGrid(msg.mapSize);
             if (msg.players != null) spawnPlayer(msg);
         }
@@ -165,6 +223,9 @@ public class ConnectionManager : MonoBehaviour
 
         if (msg.players != null && msg.type == ServerMessageType.UPDATE)
         {
+            if (roomId != msg.id) roomId = msg.id;
+            if (players.Keys.ToList() != msg.players.Keys.ToList()) spawnPlayer(msg);
+
             foreach (string id in players.Keys)
             {
                 if (!players.ContainsKey(id) || !msg.players.ContainsKey(id)) continue;
@@ -186,6 +247,7 @@ public class ConnectionManager : MonoBehaviour
                 {
                     PlayerNetworkObject obj = players[id];
                     players.Remove(id);
+                    Debug.Log(obj.gameObject.name);
                     DestroyImmediate(obj.gameObject);
                 }
             }

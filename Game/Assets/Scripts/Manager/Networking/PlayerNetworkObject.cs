@@ -1,10 +1,12 @@
 using System;
 using DG.Tweening;
+using TMPro;
 using UnityEngine;
 
 class PlayerNetworkObject : MonoBehaviour
 {
     string id;
+    [SerializeField] TMP_Text scoreText;
     [SerializeField] MeshRenderer graphics;
     Color color;
     Gun gun;
@@ -32,6 +34,8 @@ class PlayerNetworkObject : MonoBehaviour
     {
         transform.DOMove(_transform.position, 0.1f);
         if (both) transform.DORotate(_transform.rotation, 0.3f);
+
+        scoreText.text = _transform.score.ToString();
 
         DamageableItem item = GetComponent<DamageableItem>();
         if (item != null)
