@@ -8253,6 +8253,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2bdc151d579d8c40a339426fbf2bf5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ConnectionManager
+  url: ws://localhost:8080/game
   playerId: 
   roomId: CreateRoom
   playerPrefab: {fileID: 6037498542443110057, guid: 82edf2f3cec4b9748925d247f14c127e, type: 3}

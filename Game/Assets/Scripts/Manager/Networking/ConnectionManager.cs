@@ -9,6 +9,8 @@ using System.Linq;
 using Unity.Mathematics;
 using TMPro;
 
+//The deployed server url
+//wss://cubox.onrender.com/game
 
 public class ConnectionManager : MonoBehaviour
 {
@@ -16,7 +18,7 @@ public class ConnectionManager : MonoBehaviour
     BulletManager bulletMan;
     EnemySpawner enemySpawn;
     WebSocket ws;
-    public string playerId;
+    public string url, playerId;
     public string roomId;
     [SerializeField] GameObject playerPrefab;
     Dictionary<string, PlayerNetworkObject> players = new Dictionary<string, PlayerNetworkObject>();
@@ -79,7 +81,7 @@ public class ConnectionManager : MonoBehaviour
 
     async void Connect()
     {
-        ws = new WebSocket("wss://cubox.onrender.com/game");
+        ws = new WebSocket(url);
 
         ws.OnOpen += async () =>
         {
@@ -102,6 +104,7 @@ public class ConnectionManager : MonoBehaviour
             var message = System.Text.Encoding.UTF8.GetString(bytes);
             var jsonMsg = JsonConvert.DeserializeObject<ServerMessage>(message);
 
+            Debug.Log(message);
             onMessageRecieve(jsonMsg);
         };
 
